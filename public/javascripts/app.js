@@ -2,6 +2,7 @@
 const DebugShowNumbers = false;
 
 const canvas = document.getElementById("board-canvas");
+
 const ctx = canvas.getContext("2d");
 
 // load the "Bitter" font from Google Fonts
@@ -10,6 +11,15 @@ const fontRobotoFile = new FontFace(
 	"url(/fonts/Roboto-Regular.ttf)",
   );
 document.fonts.add(fontRobotoFile);
+
+const mouse = {x: 0, y: 0};
+const mouseAbsolute = {x: 0, y: 0};
+var SquareSize = 100;
+var PieceSize = 98;
+var ColorSquareWhite = '#f0d9b5';
+var ColorSquareBlack = '#b58863';
+let StartingPosition = InterpretFen('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+var PiecesImages = [];
 
 function DrawSquare(x, y, w, h, color){
 	ctx.fillStyle = color;
@@ -20,13 +30,11 @@ function DrawImage(x, y, w, h, image){
 	ctx.drawImage(image, x, y, w, h);
 }
 
-
-
 function DrawText(x, y, size, color, text) {
 	ctx.font = `${size} "Roboto"`;
 	ctx.fillStyle = color;
 	ctx.fillText(text, x, y);
-  }
+}
 
 function SquareIndexToPosition(index){
 	let position = "";
@@ -36,12 +44,6 @@ function SquareIndexToPosition(index){
 	return position;
 }
 
-var SquareSize = 100;
-var PieceSize = 98;
-var ColorSquareWhite = '#f0d9b5';
-var ColorSquareBlack = '#b58863';
-
-var PiecesImages = [];
 //https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces
 //kK/qQ/rR/nN/bB/pP//
 function LoadPieces(){
@@ -143,7 +145,6 @@ function InterpretFen(notation){
 	console.log(positions);
 	return positions;
 }
-let StartingPosition = InterpretFen('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
 
 function drawChessBoard(position){
 	let squareIndex = 0;
@@ -198,7 +199,6 @@ function drawChessBoard(position){
 	}
 }
 
-
 LoadPieces();
 var len = PiecesImages.length,
     counter = 0;
@@ -213,24 +213,109 @@ var len = PiecesImages.length,
 function incrementCounter() {
     counter++;
     if ( counter === len ) {
-        drawChessBoard(StartingPosition);
+        Start();
     }
 }
-
-document.addEventListener('DOMContentLoaded', function() {
-	fontRobotoFile.load().then(
-		() => {
-			
-		},
-		(err) => {
-			console.error(err);
-		},
-		);
-}, false);
 
 let input = document.getElementById("fen-input");
 function ApplyFen(){
 
-	StartingPosition = InterpretFen(input.value);
-	drawChessBoard(StartingPosition);
+	CurrentPosition = InterpretFen(input.value);
+	DisplayPosition = CurrentPosition.slice();
+	drawChessBoard(DisplayPosition);
 }
+
+let mouseOneDown = false;
+let mouseTwoDown = false;
+
+document.onmousemove = updateMousePosition;
+window.addEventListener('contextmenu', function (e) { 
+    e.preventDefault(); 
+}, false);
+
+var DisplayPosition = StartingPosition.slice();
+var CurrentPosition = StartingPosition.slice();
+
+function Start(){
+	drawChessBoard(DisplayPosition);
+}
+
+let PieceHeldIndex = -1;
+let PieceHeld = '';
+
+function updateMousePosition(event){
+    var dot, eventDoc, doc, body, pageX, pageY;
+	let rect = canvas.getBoundingClientRect();
+    event = event || window.event; // IE-ism
+
+    // If pageX/Y aren't available and clientX/Y are,
+    // calculate pageX/Y - logic taken from jQuery.
+    // (This is to support old IE)
+    if (event.pageX == null && event.clientX != null) {
+        eventDoc = (event.target && event.target.ownerDocument) || document;
+        doc = eventDoc.documentElement;
+        body = eventDoc.body;
+
+        event.pageX = event.clientX +
+            (doc && doc.scrollLeft || body && body.scrollLeft || 0) -
+            (doc && doc.clientLeft || body && body.clientLeft || 0);
+        event.pageY = event.clientY +
+            (doc && doc.scrollTop  || body && body.scrollTop  || 0) -
+            (doc && doc.clientTop  || body && body.clientTop  || 0 );
+    }
+
+    mouseAbsolute.x = event.pageX;
+    mouseAbsolute.y = event.pageY;
+
+    mouse.x = event.pageX - rect.left;
+    mouse.y = event.pageY - rect.top;
+
+	let mSqX = Math.floor(mouse.x / SquareSize);
+	let mSqY = Math.floor(mouse.y / SquareSize);
+
+
+
+	let mIndex = (mSqX + (mSqY * 8));
+
+	if(mSqX < 0 || mSqX > 7 || mSqY < 0 || mSqY > 7) return;
+	
+	console.log({PieceHeldIndex})
+	if(PieceHeldIndex == -1){
+		if(CurrentPosition[mIndex] != 'x' && mouseOneDown){
+			DisplayPosition[mIndex] = 'x';
+			PieceHeldIndex = mIndex;
+			drawChessBoard(DisplayPosition);
+			console.log(`${CurrentPosition[PieceHeldIndex]} held at ${mSqX} ${mSqY}`);
+		}
+	}else{
+		if(!mouseOneDown){
+			
+			console.log(`${CurrentPosition[PieceHeldIndex]} dropping off at ${mSqX} ${mSqY}`);
+			CurrentPosition[mIndex] = CurrentPosition[PieceHeldIndex];
+			CurrentPosition[PieceHeldIndex] = 'x';
+			DisplayPosition = CurrentPosition.slice();
+			drawChessBoard(DisplayPosition);
+			PieceHeldIndex = -1;
+			
+		}else{
+			console.log(`${CurrentPosition[PieceHeldIndex]} held at ${mSqX} ${mSqY}`);
+		}
+	}
+	
+}
+
+canvas.addEventListener('mousedown', function(event){
+    if(event.button === 0){
+        mouseOneDown = true;
+    }else{
+        mouseTwoDown = true;
+    }
+});
+
+canvas.addEventListener('mouseup', function(event){
+    if(event.button === 0){
+        mouseOneDown = false;
+    }else{
+        mouseTwoDown = false;
+    }
+});
