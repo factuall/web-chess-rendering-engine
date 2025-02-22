@@ -1,5 +1,5 @@
-// App js
-
+//DEBUG FLAGS
+const DebugShowNumbers = false;
 
 const canvas = document.getElementById("board-canvas");
 const ctx = canvas.getContext("2d");
@@ -120,9 +120,32 @@ function DrawPiece(sqX, sqY, piece){
 	}
 }
 
+function InterpretFen(notation){
+	let positions = [];
+	let ntFragments = notation.split(" ");
+	let rows = ntFragments[0].split("/");
 
+	for (let row = 0; row < rows.length; row++) {
+		console.log(rows[row]);
+		let tokens = rows[row].split("");
+		for (let token = 0; token < tokens.length; token++) {
 
-function drawChessBoard(){
+			var tokenNum = parseInt(tokens[token]);
+			if(!isNaN(tokenNum) && tokens[token] === '' + tokenNum){ //number token
+				for (let i = 0; i < tokens[token]; i++) {
+					positions.push('x');	
+				}
+			}else{ //letter token
+					positions.push(tokens[token]);
+			}
+		}
+	}
+	console.log(positions);
+	return positions;
+}
+let StartingPosition = InterpretFen('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+
+function drawChessBoard(position){
 	let squareIndex = 0;
 	for (let posY = 0; posY < 8; posY++) {
 		for (let posX = 0; posX < 8; posX++) {
@@ -131,50 +154,47 @@ function drawChessBoard(){
 				posY * SquareSize,
 				SquareSize,
 				SquareSize,
-				squareIndex % 2 == 0 ? ColorSquareWhite : ColorSquareBlack
+				posY % 2 != 0 ? 
+				(squareIndex % 2 == 0 ? ColorSquareBlack : ColorSquareWhite) : (squareIndex % 2 == 0 ? ColorSquareWhite : ColorSquareBlack)
 			);
-			/* Draw square indexes
+
+			if(DebugShowNumbers)
 			DrawText(
 				(posX * SquareSize) + 2, 
 				(posY * SquareSize) + SquareSize - 2,
 				'large',
 				'black',
 				squareIndex
-			);*/
-			if(posY == 7){
+			);
+			
+			if(posY == 7){ //draw letters at the bottom of the board
 				DrawText(
 					(posX * SquareSize) + 84, 
 					(posY * SquareSize) + SquareSize - 4,
 					'25px',
-					squareIndex % 2 == 0 ? ColorSquareBlack : ColorSquareWhite,
+					posY % 2 != 0 ? 
+					(squareIndex % 2 == 0 ? ColorSquareWhite : ColorSquareBlack) : (squareIndex % 2 == 0 ? ColorSquareWhite : ColorSquareBlack),
 					String.fromCharCode(97 + posX)
 				);
 			}
-			if(posX == 0){
+			
+			if(posX == 0){ //draw numbers on the left side of the board
 				DrawText(
 					(posX * SquareSize) + 2, 
 					(posY * SquareSize) + 22,
 					'25px',
-					squareIndex % 2 == 0 ? ColorSquareBlack : ColorSquareWhite,
+					posY % 2 != 0 ? 
+					(squareIndex % 2 == 0 ? ColorSquareWhite : ColorSquareBlack) : (squareIndex % 2 == 0 ? ColorSquareBlack : ColorSquareWhite),
 					posY + 1
 				);
 			}
+
+			if(position[squareIndex] != 'x'){//draw a piece if anything's there
+				DrawPiece(posX, posY, position[squareIndex])
+			}
 			squareIndex++;
 		}
-		squareIndex++;
-
-		DrawPiece(0,0,'k');
-		DrawPiece(0,1,'K');
-		DrawPiece(1,0,'q');
-		DrawPiece(1,1,'Q');
-		DrawPiece(2,0,'r');
-		DrawPiece(2,1,'R');
-		DrawPiece(3,0,'b');
-		DrawPiece(3,1,'B');
-		DrawPiece(4,0,'n');
-		DrawPiece(4,1,'N');
-		DrawPiece(5,0,'p');
-		DrawPiece(5,1,'P');
+		
 	}
 }
 
@@ -193,7 +213,7 @@ var len = PiecesImages.length,
 function incrementCounter() {
     counter++;
     if ( counter === len ) {
-        drawChessBoard();
+        drawChessBoard(StartingPosition);
     }
 }
 
@@ -208,3 +228,9 @@ document.addEventListener('DOMContentLoaded', function() {
 		);
 }, false);
 
+let input = document.getElementById("fen-input");
+function ApplyFen(){
+
+	StartingPosition = InterpretFen(input.value);
+	drawChessBoard(StartingPosition);
+}

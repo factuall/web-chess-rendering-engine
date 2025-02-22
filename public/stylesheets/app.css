@@ -24,10 +24,37 @@ a {
     "wdth" 100;
 }
 
-#container{
+.container{
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+input{
+  background-color: rgb(27, 27, 27);
+  transition: all 0.3s;
+  border: 4px;
+  border-radius: 4px;
+  padding: 8px;
+  font-size: large;
+  margin: 8px;
+  color: white;
+  width: 550px;
+}
+
+input:hover{
+  background-color: rgb(10, 10, 10);
+}
+
+button{
+  background-color: rgb(83, 83, 83);
+  border: solid rgb(37, 37, 37) 2px;
+  border-radius: 4px;
+  padding: 8px;
+  font-size: large;
+  margin: 8px;
+  color: white;
+  width: 220px;
 }
 
 #board-canvas{
