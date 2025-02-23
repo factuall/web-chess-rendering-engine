@@ -80,43 +80,46 @@ function LoadPieces(){
 }
 
 function DrawPiece(sqX, sqY, piece){
+	DrawPieceAbs(sqX * SquareSize, sqY*SquareSize, piece);
+}
+function DrawPieceAbs(x, y, piece){
 	let pieceImage;
 	switch(piece){
 		case 'k':
-			DrawImage(sqX * SquareSize, sqY * SquareSize, PieceSize, PieceSize, PiecesImages[0]);
+			DrawImage(x, y, PieceSize, PieceSize, PiecesImages[0]);
 			break;
 		case 'K':
-			DrawImage(sqX * SquareSize, sqY * SquareSize, PieceSize, PieceSize, PiecesImages[1]);
+			DrawImage(x, y, PieceSize, PieceSize, PiecesImages[1]);
 			break;
 		case 'q':
-			DrawImage(sqX * SquareSize, sqY * SquareSize, PieceSize, PieceSize, PiecesImages[2]);
+			DrawImage(x, y, PieceSize, PieceSize, PiecesImages[2]);
 			break;
 		case 'Q':
-			DrawImage(sqX * SquareSize, sqY * SquareSize, PieceSize, PieceSize, PiecesImages[3]);
+			DrawImage(x, y, PieceSize, PieceSize, PiecesImages[3]);
 			break;
 		case 'r':
-			DrawImage(sqX * SquareSize, sqY * SquareSize, PieceSize, PieceSize, PiecesImages[4]);
+			DrawImage(x, y, PieceSize, PieceSize, PiecesImages[4]);
 			break;
 		case 'R':
-			DrawImage(sqX * SquareSize, sqY * SquareSize, PieceSize, PieceSize, PiecesImages[5]);
+			DrawImage(x, y, PieceSize, PieceSize, PiecesImages[5]);
 			break;
 		case 'n':
-			DrawImage(sqX * SquareSize, sqY * SquareSize, PieceSize, PieceSize, PiecesImages[6]);
+			DrawImage(x, y, PieceSize, PieceSize, PiecesImages[6]);
 			break;
 		case 'N':
-			DrawImage(sqX * SquareSize, sqY * SquareSize, PieceSize, PieceSize, PiecesImages[7]);
+			DrawImage(x, y, PieceSize, PieceSize, PiecesImages[7]);
 			break;
 		case 'b':
-			DrawImage(sqX * SquareSize, sqY * SquareSize, PieceSize, PieceSize, PiecesImages[8]);
+			DrawImage(x, y, PieceSize, PieceSize, PiecesImages[8]);
 			break;
 		case 'B':
-			DrawImage(sqX * SquareSize, sqY * SquareSize, PieceSize, PieceSize, PiecesImages[9]);
+			DrawImage(x, y, PieceSize, PieceSize, PiecesImages[9]);
 			break;
 		case 'p':
-			DrawImage(sqX * SquareSize, sqY * SquareSize, PieceSize, PieceSize, PiecesImages[10]);
+			DrawImage(x, y, PieceSize, PieceSize, PiecesImages[10]);
 			break;
 		case 'P':
-			DrawImage(sqX * SquareSize, sqY * SquareSize, PieceSize, PieceSize, PiecesImages[11]);
+			DrawImage(x, y, PieceSize, PieceSize, PiecesImages[11]);
 			break;
 
 	}
@@ -243,7 +246,12 @@ function Start(){
 let PieceHeldIndex = -1;
 let PieceHeld = '';
 
+let rerender = false;
 function updateMousePosition(event){
+	if(rerender = true){
+		drawChessBoard(DisplayPosition);
+		rerender = false;
+	}
     var dot, eventDoc, doc, body, pageX, pageY;
 	let rect = canvas.getBoundingClientRect();
     event = event || window.event; // IE-ism
@@ -280,25 +288,27 @@ function updateMousePosition(event){
 	if(mSqX < 0 || mSqX > 7 || mSqY < 0 || mSqY > 7) return;
 	
 	console.log({PieceHeldIndex})
-	if(PieceHeldIndex == -1){
+	if(PieceHeldIndex == -1){ //no piece held
 		if(CurrentPosition[mIndex] != 'x' && mouseOneDown){
 			DisplayPosition[mIndex] = 'x';
 			PieceHeldIndex = mIndex;
 			drawChessBoard(DisplayPosition);
 			console.log(`${CurrentPosition[PieceHeldIndex]} held at ${mSqX} ${mSqY}`);
 		}
-	}else{
+	}else{//piece held
 		if(!mouseOneDown){
 			
 			console.log(`${CurrentPosition[PieceHeldIndex]} dropping off at ${mSqX} ${mSqY}`);
 			CurrentPosition[mIndex] = CurrentPosition[PieceHeldIndex];
-			CurrentPosition[PieceHeldIndex] = 'x';
+			if(mIndex != PieceHeldIndex)CurrentPosition[PieceHeldIndex] = 'x';
 			DisplayPosition = CurrentPosition.slice();
 			drawChessBoard(DisplayPosition);
 			PieceHeldIndex = -1;
 			
 		}else{
+			DrawPieceAbs(mouse.x - (PieceSize/2), mouse.y - (PieceSize/2), CurrentPosition[PieceHeldIndex]);
 			console.log(`${CurrentPosition[PieceHeldIndex]} held at ${mSqX} ${mSqY}`);
+			rerender = true;
 		}
 	}
 	
