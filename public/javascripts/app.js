@@ -1,5 +1,10 @@
 //DEBUG FLAGS
 const DebugShowNumbers = false;
+const DebugShowPosOnHover = true;
+const ApplyRules = true; 
+
+//PUBLIC FLAGS
+var boardFlipped = true; // !TODO!
 
 const canvas = document.getElementById("board-canvas");
 
@@ -14,11 +19,13 @@ document.fonts.add(fontRobotoFile);
 
 const mouse = {x: 0, y: 0};
 const mouseAbsolute = {x: 0, y: 0};
+const mouseSq = {x: 0, y: 0};
 var SquareSize = 100;
 var PieceSize = 98;
 var ColorSquareWhite = '#f0d9b5';
 var ColorSquareBlack = '#b58863';
 let StartingPosition = InterpretFen('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+let TwokingsPosition = InterpretFen('3k4/8/8/8/8/4K3/8/8 w KQkq - 0 1');
 var PiecesImages = [];
 
 function DrawSquare(x, y, w, h, color){
@@ -131,7 +138,6 @@ function InterpretFen(notation){
 	let rows = ntFragments[0].split("/");
 
 	for (let row = 0; row < rows.length; row++) {
-		console.log(rows[row]);
 		let tokens = rows[row].split("");
 		for (let token = 0; token < tokens.length; token++) {
 
@@ -145,8 +151,52 @@ function InterpretFen(notation){
 			}
 		}
 	}
-	console.log(positions);
 	return positions;
+}
+
+function PositionToFen(position){
+	let fen = "";
+	for (let posY = 0; posY < 8; posY++) {
+		
+		let emptyCounter = 0;
+		for (let posX = 0; posX < 8; posX++) {
+			let offset = posX + (posY * 8);
+			if(position[offset] == 'x'){
+				emptyCounter++;
+				if(posX < 7 ){
+					if(position[offset+1] != 'x'){
+						fen += emptyCounter;
+						emptyCounter = 0;
+					}
+				}
+				else{
+					fen += emptyCounter;
+					emptyCounter = 0;
+				}
+			}
+			else {
+				if(emptyCounter > 0){
+					fen += emptyCounter;
+					emptyCounter = 0;
+				}
+				fen += position[offset]	
+			}
+		}
+		if(posY < 7) fen += '/';
+	}
+	fen += " !TODO!";
+	return fen;
+}
+
+let FenInput = document.getElementById("fen-input");
+function ApplyFen(){
+	CurrentPosition = InterpretFen(FenInput.value);
+	DisplayPosition = CurrentPosition.slice();
+	drawChessBoard(DisplayPosition);
+}
+
+function UpdateFenBar(){
+	FenInput.value = PositionToFen(CurrentPosition);
 }
 
 function drawChessBoard(position){
@@ -171,18 +221,19 @@ function drawChessBoard(position){
 				squareIndex
 			);
 			
-			if(posY == 7){ //draw letters at the bottom of the board
+			let isDebugSquare = (DebugShowPosOnHover && posX == mouseSq.x && posY == mouseSq.y);
+			if(posY == 7 || isDebugSquare){ //draw letters at the bottom of the board
 				DrawText(
 					(posX * SquareSize) + 84, 
 					(posY * SquareSize) + SquareSize - 4,
 					'25px',
 					posY % 2 != 0 ? 
-					(squareIndex % 2 == 0 ? ColorSquareWhite : ColorSquareBlack) : (squareIndex % 2 == 0 ? ColorSquareWhite : ColorSquareBlack),
+					(squareIndex % 2 == 0 ? ColorSquareWhite : ColorSquareBlack) : (squareIndex % 2 == 0 ? ColorSquareBlack : ColorSquareWhite),
 					String.fromCharCode(97 + posX)
 				);
 			}
 			
-			if(posX == 0){ //draw numbers on the left side of the board
+			if(posX == 0 || isDebugSquare){ //draw numbers on the left side of the board
 				DrawText(
 					(posX * SquareSize) + 2, 
 					(posY * SquareSize) + 22,
@@ -220,14 +271,6 @@ function incrementCounter() {
     }
 }
 
-let input = document.getElementById("fen-input");
-function ApplyFen(){
-
-	CurrentPosition = InterpretFen(input.value);
-	DisplayPosition = CurrentPosition.slice();
-	drawChessBoard(DisplayPosition);
-}
-
 let mouseOneDown = false;
 let mouseTwoDown = false;
 
@@ -241,17 +284,20 @@ var CurrentPosition = StartingPosition.slice();
 
 function Start(){
 	drawChessBoard(DisplayPosition);
+	PositionToFen(CurrentPosition);
 }
 
 let PieceHeldIndex = -1;
 let PieceHeld = '';
 
-let rerender = false;
+let rerender = false; //set true if next mouse update needs board rerendered 
+let ignoreMOne = false; //used to prevent user from pressing m1 on empty square, moving to another square and then getting a piece grabbed 
 function updateMousePosition(event){
 	if(rerender = true){
 		drawChessBoard(DisplayPosition);
 		rerender = false;
 	}
+	
     var dot, eventDoc, doc, body, pageX, pageY;
 	let rect = canvas.getBoundingClientRect();
     event = event || window.event; // IE-ism
@@ -281,33 +327,45 @@ function updateMousePosition(event){
 	let mSqX = Math.floor(mouse.x / SquareSize);
 	let mSqY = Math.floor(mouse.y / SquareSize);
 
+	if((mSqX != mouseSq.x || mSqY != mouseSq.y) && DebugShowPosOnHover) rerender = true;
+
+	mouseSq.x = mSqX;
+	mouseSq.y = mSqY;
+
 
 
 	let mIndex = (mSqX + (mSqY * 8));
 
 	if(mSqX < 0 || mSqX > 7 || mSqY < 0 || mSqY > 7) return;
 	
-	console.log({PieceHeldIndex})
 	if(PieceHeldIndex == -1){ //no piece held
-		if(CurrentPosition[mIndex] != 'x' && mouseOneDown){
-			DisplayPosition[mIndex] = 'x';
-			PieceHeldIndex = mIndex;
-			drawChessBoard(DisplayPosition);
-			console.log(`${CurrentPosition[PieceHeldIndex]} held at ${mSqX} ${mSqY}`);
+		if(mouseOneDown){
+			if(CurrentPosition[mIndex] != 'x' && !ignoreMOne){
+				DisplayPosition[mIndex] = 'x';
+				PieceHeldIndex = mIndex;
+				drawChessBoard(DisplayPosition);
+				DrawPieceAbs(mouse.x - (PieceSize/2), mouse.y - (PieceSize/2), CurrentPosition[PieceHeldIndex]);
+				rerender = true;
+			}
+			else{
+				ignoreMOne = true;
+			}
 		}
+		else{
+			ignoreMOne = false;
+		}
+		
 	}else{//piece held
 		if(!mouseOneDown){
-			
-			console.log(`${CurrentPosition[PieceHeldIndex]} dropping off at ${mSqX} ${mSqY}`);
 			CurrentPosition[mIndex] = CurrentPosition[PieceHeldIndex];
 			if(mIndex != PieceHeldIndex)CurrentPosition[PieceHeldIndex] = 'x';
 			DisplayPosition = CurrentPosition.slice();
 			drawChessBoard(DisplayPosition);
 			PieceHeldIndex = -1;
+			UpdateFenBar();
 			
 		}else{
 			DrawPieceAbs(mouse.x - (PieceSize/2), mouse.y - (PieceSize/2), CurrentPosition[PieceHeldIndex]);
-			console.log(`${CurrentPosition[PieceHeldIndex]} held at ${mSqX} ${mSqY}`);
 			rerender = true;
 		}
 	}
