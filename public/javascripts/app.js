@@ -1,6 +1,7 @@
+import {DEBUG_SHOWPOS_ONHOVER, SquareSize, PieceSize, CurrentPosition, setCurrentPosition} from "./globals.js"
 import {InterpretFen, PositionToFen} from "./chess-utils.js"
-import { SetPieceImages, drawChessBoard } from "./board-drawing.js"
-import {DEBUG_SHOWPOS_ONHOVER, SquareSize, PieceSize} from "./globals.js"
+import { SetPieceImages, drawChessBoard } from "./board.js"
+
 //DEBUG FLAGS
 
 
@@ -19,9 +20,6 @@ const fontRobotoFile = new FontFace(
   );
 document.fonts.add(fontRobotoFile);
 
-const mouse = {x: 0, y: 0};
-const mouseAbsolute = {x: 0, y: 0};
-const mouseSq = {x: 0, y: 0};
 
 let StartingPosition = InterpretFen('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
 let TwokingsPosition = InterpretFen('3k4/8/8/8/8/4K3/8/8 w KQkq - 0 1');
@@ -61,19 +59,6 @@ function LoadPieces(){
 	PiecesImages.push(new Image());
 	PiecesImages[11].src = "/images/Chess_plt45.svg";
 	
-}
-
-
-
-let FenInput = document.getElementById("fen-input");
-function ApplyFen(){
-	CurrentPosition = InterpretFen(FenInput.value);
-	DisplayPosition = CurrentPosition.slice();
-	drawChessBoard(DisplayPosition);
-}
-
-function UpdateFenBar(){
-	FenInput.value = PositionToFen(CurrentPosition);
 }
 
 //credit for idea/function: Sebastian Lague
@@ -136,121 +121,11 @@ function incrementCounter() {
     }
 }
 
-let mouseOneDown = false;
-let mouseTwoDown = false;
-
-document.onmousemove = updateMousePosition;
-window.addEventListener('contextmenu', function (e) { 
-    e.preventDefault(); 
-}, false);
-
 var DisplayPosition = StartingPosition.slice();
-var CurrentPosition = StartingPosition.slice();
+setCurrentPosition(StartingPosition.slice());
 
 function Start(){
 	SetPieceImages(PiecesImages);
 	drawChessBoard(DisplayPosition);
 	PositionToFen(CurrentPosition);
 }
-
-let PieceHeldIndex = -1;
-let PieceHeld = '';
-
-let rerender = false; //set true if next mouse update needs board rerendered 
-let ignoreMOne = false; //used to prevent user from pressing m1 on empty square, moving to another square and then getting a piece grabbed 
-function updateMousePosition(event){
-	if(rerender = true){
-		drawChessBoard(DisplayPosition);
-		rerender = false;
-	}
-	
-    var dot, eventDoc, doc, body, pageX, pageY;
-	let rect = CANVAS.getBoundingClientRect();
-    event = event || window.event; // IE-ism
-
-    // If pageX/Y aren't available and clientX/Y are,
-    // calculate pageX/Y - logic taken from jQuery.
-    // (This is to support old IE)
-    if (event.pageX == null && event.clientX != null) {
-        eventDoc = (event.target && event.target.ownerDocument) || document;
-        doc = eventDoc.documentElement;
-        body = eventDoc.body;
-
-        event.pageX = event.clientX +
-            (doc && doc.scrollLeft || body && body.scrollLeft || 0) -
-            (doc && doc.clientLeft || body && body.clientLeft || 0);
-        event.pageY = event.clientY +
-            (doc && doc.scrollTop  || body && body.scrollTop  || 0) -
-            (doc && doc.clientTop  || body && body.clientTop  || 0 );
-    }
-
-    mouseAbsolute.x = event.pageX;
-    mouseAbsolute.y = event.pageY;
-
-    mouse.x = event.pageX - rect.left;
-    mouse.y = event.pageY - rect.top;
-
-	let mSqX = Math.floor(mouse.x / SquareSize);
-	let mSqY = Math.floor(mouse.y / SquareSize);
-
-	if((mSqX != mouseSq.x || mSqY != mouseSq.y) && DEBUG_SHOWPOS_ONHOVER) rerender = true;
-
-	mouseSq.x = mSqX;
-	mouseSq.y = mSqY;
-
-
-
-	let mIndex = (mSqX + (mSqY * 8));
-
-	if(mSqX < 0 || mSqX > 7 || mSqY < 0 || mSqY > 7) return;
-	
-	/*
-	if(PieceHeldIndex == -1){ //no piece held
-		if(mouseOneDown){
-			if(CurrentPosition[mIndex] != 'x' && !ignoreMOne){
-				DisplayPosition[mIndex] = 'x';
-				PieceHeldIndex = mIndex;
-				drawChessBoard(DisplayPosition);
-				DrawPieceAbs(mouse.x - (PieceSize/2), mouse.y - (PieceSize/2), CurrentPosition[PieceHeldIndex]);
-				rerender = true;
-			}
-			else{
-				ignoreMOne = true;
-			}
-		}
-		else{
-			ignoreMOne = false;
-		}
-		
-	}else{//piece held
-		if(!mouseOneDown){
-			CurrentPosition[mIndex] = CurrentPosition[PieceHeldIndex];
-			if(mIndex != PieceHeldIndex)CurrentPosition[PieceHeldIndex] = 'x';
-			DisplayPosition = CurrentPosition.slice();
-			drawChessBoard(DisplayPosition);
-			PieceHeldIndex = -1;
-			UpdateFenBar();
-			
-		}else{
-			DrawPieceAbs(mouse.x - (PieceSize/2), mouse.y - (PieceSize/2), CurrentPosition[PieceHeldIndex]);
-			rerender = true;
-		}
-	}
-	*/
-}
-
-CANVAS.addEventListener('mousedown', function(event){
-    if(event.button === 0){
-        mouseOneDown = true;
-    }else{
-        mouseTwoDown = true;
-    }
-});
-
-CANVAS.addEventListener('mouseup', function(event){
-    if(event.button === 0){
-        mouseOneDown = false;
-    }else{
-        mouseTwoDown = false;
-    }
-});

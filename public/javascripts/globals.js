@@ -3,3 +3,8 @@ export const DEBUG_SHOWPOS_ONHOVER = true;
 export const APPLY_CHESS_RULES = true; 
 export var SquareSize = 100;
 export var PieceSize = 98;
+export var CurrentPosition = [];
+
+export function setCurrentPosition(position){
+    CurrentPosition = position;
+}
