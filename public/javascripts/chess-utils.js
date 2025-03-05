@@ -23,8 +23,9 @@ export function InterpretFen(fen){
 export function SquareIndexToPosition(index){
 	let position = "";
 	
-	let column =  //Math.ceil(index /  )// index-((Math.floor((index)/8)*8));
-	position += column;//
+	let row =  String.fromCharCode(97 + index - (Math.floor(index /  8) * 8))// index-((Math.floor((index)/8)*8));
+	let column = 8 - (Math.floor(index /  8))
+	position += row + column;//
 	return position;
 }
 

@@ -7,9 +7,10 @@
 
 	<!-- STYLES -->
 	<link rel="stylesheet" href="stylesheets/app.css">
+    <link rel="stylesheet" href="stylesheets/position-minigame.css">
 
 	<!-- JS -->
-
+    <script type="module" src="javascripts/minigame.js"></script>
 
 </head>
 <body>
@@ -20,10 +21,13 @@
 	<div class="container">
 		<canvas id="board-canvas" width="800" height="800"></canvas>
 	</div>
+   
 	<div class="container">
-		<button onclick="ApplyFen()">Apply a position (FEN)</button>
-		<input id="fen-input" type="text" value="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1">
+		<input id="guess-input" type="text" value="">
 	</div>
-	<script type="module" src="javascripts/app.js"></script>
+    <div class="container">
+        <button onclick="StartMiniGame()">Start the mini-game</button>
+	</div>
+
 </body>
 </html>

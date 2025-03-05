@@ -61,48 +61,6 @@ function LoadPieces(){
 	
 }
 
-//credit for idea/function: Sebastian Lague
-var SqDirectionOffsets = [-8, 8, -1, 1, -7, 7, -9, 9]; // north, south, west, east, nw, sw, ne, se
-var SqEdgeDistances = [];
-function PrecomputeEdgeDistances(){
-	SqEdgeDistances = [];
-	for (let posY = 0; posY < 8; posY++) {
-		for (let posX = 0; posX < 8; posX++) {
-			let numNorth = posY;
-			let numSouth = 7 - posY;
-			let numWest = posX;
-			let numEast = 7 - posX;
-
-			SqEdgeDistances.push([
-				numNorth,
-				numSouth,
-				numWest,
-				numEast
-			]);
-		}
-	}
-}
-PrecomputeEdgeDistances();
-console.log(SqEdgeDistances);
-
-function GetPossibleMoves(position){
-	let positionMoves = [];
-	for (let posY = 0; posY < 8; posY++) {
-		for (let posX = 0; posX < 8; posX++) {
-			let posIndex = (posY * 8) + posX;
-			if(posIndex[posIndex] != 'x'){
-				let moves = [];
-				if(posIndex[posIndex] === posIndex[posIndex].toUpperCase() && whiteMoves){
-					//white piece & white moves - check its moves
-				}else if(posIndex[posIndex] === posIndex[posIndex].toLowerCase() && !whiteMoves){
-					//black piece & black moves - check its moves
-				}
-				positionMoves.push(moves)
-			}
-		}
-	}
-}
-
 LoadPieces();
 var len = PiecesImages.length,
     counter = 0;

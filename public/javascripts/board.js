@@ -1,4 +1,4 @@
-import {DEBUG_SHOW_NUMBERS, DEBUG_SHOWPOS_ONHOVER, APPLY_CHESS_RULES, CurrentPosition} from "./globals.js";
+import {DEBUG_SHOW_NUMBERS, DEBUG_SHOWPOS_ONHOVER, APPLY_CHESS_RULES, CurrentPosition, ShowPositionSideCharacters} from "./globals.js";
 import { PositionToFen } from "./chess-utils.js";
 
 var SquareSize = 100;
@@ -100,8 +100,8 @@ export function drawChessBoard(position){
                 squareIndex
             );
             
-            /*let isDebugSquare = (DEBUG_SHOWPOS_ONHOVER && posX == mouseSq.x && posY == mouseSq.y);
-            if(posY == 7 || isDebugSquare){ //draw letters at the bottom of the board
+            let isDebugSquare = (DEBUG_SHOWPOS_ONHOVER && posX == mouseSq.x && posY == mouseSq.y);
+            if((posY == 7 && ShowPositionSideCharacters) || isDebugSquare){ //draw letters at the bottom of the board
                 DrawText(
                     (posX * SquareSize) + 84, 
                     (posY * SquareSize) + SquareSize - 4,
@@ -112,16 +112,16 @@ export function drawChessBoard(position){
                 );
             }
             
-            if(posX == 0 || isDebugSquare){ //draw numbers on the left side of the board
+            if((posX == 0 && ShowPositionSideCharacters) || isDebugSquare){ //draw numbers on the left side of the board
                 DrawText(
                     (posX * SquareSize) + 2, 
                     (posY * SquareSize) + 22,
                     '25px',
                     posY % 2 != 0 ? 
                     (squareIndex % 2 == 0 ? ColorSquareWhite : ColorSquareBlack) : (squareIndex % 2 == 0 ? ColorSquareBlack : ColorSquareWhite),
-                    posY + 1
+                    8 - posY
                 );
-            }*/
+            }
 
             if(position[squareIndex] != 'x'){//draw a piece if anything's there
                 DrawPiece(posX, posY, position[squareIndex])
@@ -255,5 +255,6 @@ function ApplyFen(){
 }
 
 function UpdateFenBar(){
+    if(FenInput != null)
 	FenInput.value = PositionToFen(CurrentPosition);
 }
