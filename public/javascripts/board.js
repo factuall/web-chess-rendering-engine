@@ -7,6 +7,7 @@ var ColorSquareWhite = '#f0d9b5';
 var ColorSquareBlack = '#b58863';
 var PiecesImages = [];
 var DisplayPosition = [];
+var boardFlipped = false; 
 
 const CANVAS = document.getElementById("board-canvas");
 
@@ -78,7 +79,12 @@ export function DrawPieceAbs(x, y, piece){
 }
 
 export function drawChessBoard(position){
-    DisplayPosition = position;
+    DisplayPosition = position.slice();
+    drawBoard(boardFlipped);
+    drawPieces(position, boardFlipped);
+}
+
+function drawBoard(flipped){
     let squareIndex = 0;
     for (let posY = 0; posY < 8; posY++) {
         for (let posX = 0; posX < 8; posX++) {
@@ -99,7 +105,7 @@ export function drawChessBoard(position){
                 'black',
                 squareIndex
             );
-            
+
             let isDebugSquare = (DEBUG_SHOWPOS_ONHOVER && posX == mouseSq.x && posY == mouseSq.y);
             if((posY == 7 && ShowPositionSideCharacters) || isDebugSquare){ //draw letters at the bottom of the board
                 DrawText(
@@ -108,7 +114,7 @@ export function drawChessBoard(position){
                     '25px',
                     posY % 2 != 0 ? 
                     (squareIndex % 2 == 0 ? ColorSquareWhite : ColorSquareBlack) : (squareIndex % 2 == 0 ? ColorSquareBlack : ColorSquareWhite),
-                    String.fromCharCode(97 + posX)
+                    flipped ? String.fromCharCode(104 - posX) : String.fromCharCode(97 + posX)
                 );
             }
             
@@ -119,20 +125,33 @@ export function drawChessBoard(position){
                     '25px',
                     posY % 2 != 0 ? 
                     (squareIndex % 2 == 0 ? ColorSquareWhite : ColorSquareBlack) : (squareIndex % 2 == 0 ? ColorSquareBlack : ColorSquareWhite),
-                    8 - posY
+                    flipped ? 1 + posY : 8 - posY
                 );
-            }
-
-            if(position[squareIndex] != 'x'){//draw a piece if anything's there
-                DrawPiece(posX, posY, position[squareIndex])
             }
             squareIndex++;
         }
         
     }
+
+
 }
 
-
+function drawPieces(position, flipped){
+    let squareIndex = 0;
+    let loopDirection = flipped ? -1 : 1;
+    for (let posY = 0; posY < 8; posY++) {
+        for (let posX = 0; posX < 8; posX++) {
+            if(position[squareIndex] != 'x'){//draw a piece if anything's there
+                if(boardFlipped)
+                    DrawPiece(7 - posX, 7 - posY, position[squareIndex]);
+                else
+                    DrawPiece(posX, posY, position[squareIndex]);
+                
+            }
+            squareIndex++;
+        }
+    }
+}
 
 document.onmousemove = updateMousePosition;
 window.addEventListener('contextmenu', function (e) { 
@@ -196,7 +215,7 @@ function updateMousePosition(event){
 
 	if(mSqX < 0 || mSqX > 7 || mSqY < 0 || mSqY > 7) return;
 	
-	
+    if(boardFlipped) mIndex = 63-mIndex;
 	if(PieceHeldIndex == -1){ //no piece held
 		if(mouseOneDown){
 			if(CurrentPosition[mIndex] != 'x' && !ignoreMOne){
@@ -258,3 +277,8 @@ function UpdateFenBar(){
     if(FenInput != null)
 	FenInput.value = PositionToFen(CurrentPosition);
 }
+
+document.addEventListener('keydown', (event) => {
+    if(event.key == 'f') boardFlipped = !boardFlipped;
+    drawChessBoard(DisplayPosition);
+});

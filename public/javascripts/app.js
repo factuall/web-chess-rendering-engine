@@ -2,11 +2,7 @@ import {DEBUG_SHOWPOS_ONHOVER, SquareSize, PieceSize, CurrentPosition, setCurren
 import {InterpretFen, PositionToFen} from "./chess-utils.js"
 import { SetPieceImages, drawChessBoard } from "./board.js"
 
-//DEBUG FLAGS
-
-
 //PUBLIC FLAGS
-var boardFlipped = true; // !TODO!
 var whiteMoves = true;
 
 const CANVAS = document.getElementById("board-canvas");

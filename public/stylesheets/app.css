@@ -8,6 +8,7 @@ body {
   color: rgb(240, 240, 240);
   font-family: "Roboto", serif;
   font-size: large;
+  line-height: 50%;
 }
 
 a {
