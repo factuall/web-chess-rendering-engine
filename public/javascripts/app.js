@@ -19,6 +19,7 @@ document.fonts.add(fontRobotoFile);
 
 let StartingPosition = InterpretFen('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
 let TwokingsPosition = InterpretFen('3k4/8/8/8/8/4K3/8/8 w KQkq - 0 1');
+let OneQueen = InterpretFen('8/1Q6/8/8/8/4K3/8/8 w KQkq - 0 1');
 
 
 let PiecesImages = [];
@@ -75,8 +76,8 @@ function incrementCounter() {
     }
 }
 
-var DisplayPosition = StartingPosition.slice();
-setCurrentPosition(StartingPosition.slice());
+var DisplayPosition = OneQueen.slice();
+setCurrentPosition(OneQueen.slice());
 
 function Start(){
 	SetPieceImages(PiecesImages);

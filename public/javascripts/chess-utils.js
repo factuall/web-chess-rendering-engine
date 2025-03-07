@@ -20,13 +20,10 @@ export function InterpretFen(fen){
 	return positions;
 }
 
-export function SquareIndexToPosition(index){
-	let position = "";
-	
-	let row =  String.fromCharCode(97 + index - (Math.floor(index /  8) * 8))// index-((Math.floor((index)/8)*8));
-	let column = 8 - (Math.floor(index /  8))
-	position += row + column;//
-	return position;
+export function IndexToPosition(index){
+	let x = index - (Math.floor(index / 8) * 8);
+	let y = Math.floor(index / 8);
+	return {x, y};
 }
 
 export function PositionToFen(position){
@@ -63,26 +60,8 @@ export function PositionToFen(position){
 	return fen;
 }
 
-function GetPossibleMoves(position){
-	let positionMoves = [];
-	for (let posY = 0; posY < 8; posY++) {
-		for (let posX = 0; posX < 8; posX++) {
-			let posIndex = (posY * 8) + posX;
-			if(posIndex[posIndex] != 'x'){
-				let moves = [];
-				if(posIndex[posIndex] === posIndex[posIndex].toUpperCase() && whiteMoves){
-					//white piece & white moves - check its moves
-				}else if(posIndex[posIndex] === posIndex[posIndex].toLowerCase() && !whiteMoves){
-					//black piece & black moves - check its moves
-				}
-				positionMoves.push(moves)
-			}
-		}
-	}
-}
-
 //credit for idea/function: Sebastian Lague
-var SqDirectionOffsets = [-8, 8, -1, 1, -7, 7, -9, 9]; // north, south, west, east, nw, sw, ne, se
+var SqDirectionOffsets = [-8, 8, -1, 1, -9, -7, 7, 9]; // north, south, west, east, nw, ne, sw, se
 var SqEdgeDistances = [];
 function PrecomputeEdgeDistances(){
 	SqEdgeDistances = [];
@@ -92,15 +71,63 @@ function PrecomputeEdgeDistances(){
 			let numSouth = 7 - posY;
 			let numWest = posX;
 			let numEast = 7 - posX;
+			let numNW = Math.min(numNorth, numWest);
+			let numSW = Math.min(numSouth, numWest);
+			let numNE = Math.min(numNorth, numEast);
+			let numSE = Math.min(numSouth, numEast);
 
 			SqEdgeDistances.push([
 				numNorth,
 				numSouth,
 				numWest,
-				numEast
+				numEast,
+				numNW,
+				numNE,
+				numSW,
+				numSE
 			]);
 		}
 	}
 }
 PrecomputeEdgeDistances();
+
+
+export function GetPossiblePieceMoves(position, pieceIndex, piece){
+	let pieceMoves = [];
+	let isWhite = (piece.toUpperCase() == piece); 
+	if(piece == 'x') return pieceMoves;
+	switch(piece){
+		case 'x':
+			return pieceMoves;
+		case 'q':
+		case 'Q':
+			for (let dir = 0; dir < 8; dir++) {
+				// north, south, west, east, nw, sw, ne, se
+				let destinationIndex = pieceIndex;
+
+				for (let dist = 0; dist < SqEdgeDistances[pieceIndex][dir]; dist++) {
+					destinationIndex += SqDirectionOffsets[dir];
+
+					let isDestWhite = position[destinationIndex].toUpperCase() == position[destinationIndex];
+					if(isWhite == isDestWhite) break;
+					pieceMoves.push({from: pieceIndex, to: destinationIndex});
+					}
+				
+			}
+			return pieceMoves;
+			break;
+		default:
+			return pieceMoves;
+	}
+ }
+
+//okay, I know, this is a hack - I do it because I don't want to move to TypeScript nor use Classes right now and still have something "struct-like" 
+function chessPiece(indexOnBoard, type, possibleMoves){
+	return {index: indexOnBoard, type: type, moves: possibleMoves};
+}
+
+function move(indexFrom, indexTo){
+	return {from: indexFrom, to: indexTo};
+}
+
 console.log(SqEdgeDistances);

@@ -1,10 +1,11 @@
 import {DEBUG_SHOW_NUMBERS, DEBUG_SHOWPOS_ONHOVER, APPLY_CHESS_RULES, CurrentPosition, ShowPositionSideCharacters} from "./globals.js";
-import { PositionToFen } from "./chess-utils.js";
+import { PositionToFen, GetPossiblePieceMoves, IndexToPosition } from "./chess-utils.js";
 
 var SquareSize = 100;
 var PieceSize = 98;
 var ColorSquareWhite = '#f0d9b5';
 var ColorSquareBlack = '#b58863';
+var ColorDestination = "rgba(0, 0, 0, 0.49)"
 var PiecesImages = [];
 var DisplayPosition = [];
 var boardFlipped = false; 
@@ -30,6 +31,21 @@ function DrawText(x, y, size, color, text) {
 	CTX.font = `${size} "Roboto"`;
 	CTX.fillStyle = color;
 	CTX.fillText(text, x, y);
+}
+
+function drawCircle(x, y, r, fillColor, strokeColor, strokeWidth){
+    CTX.beginPath();
+    CTX.arc(x, y, r, 0, 2 * Math.PI);
+    if(fillColor != ''){
+        CTX.fillStyle = fillColor;
+        CTX.fill();
+    }
+    
+    if(strokeColor != '' && strokeWidth != 0){
+        CTX.strokeStyle = strokeColor;
+        CTX.stroke();
+    }
+    CTX.stroke();
 }
 
 export function DrawPiece(sqX, sqY, piece){
@@ -82,6 +98,9 @@ export function drawChessBoard(position){
     DisplayPosition = position.slice();
     drawBoard(boardFlipped);
     drawPieces(position, boardFlipped);
+    if(PieceHeldIndex != -1)
+    drawDestinations(GetPossiblePieceMoves(CurrentPosition, PieceHeldIndex, CurrentPosition[PieceHeldIndex]), boardFlipped);
+    
 }
 
 function drawBoard(flipped){
@@ -150,6 +169,15 @@ function drawPieces(position, flipped){
             }
             squareIndex++;
         }
+    }
+}
+
+function drawDestinations(moves, flipped){
+    for (let i = 0; i < moves.length; i++) {
+        let to = moves[i].to;
+        if(flipped) to = 63-to;
+        let pos = IndexToPosition(to);
+        drawCircle(pos.x * SquareSize + (SquareSize / 2), pos.y * SquareSize + (SquareSize / 2), SquareSize/4, ColorDestination, ColorDestination, 4);
     }
 }
 
@@ -235,11 +263,21 @@ function updateMousePosition(event){
 		
 	}else{//piece held
 		if(!mouseOneDown){
-			CurrentPosition[mIndex] = CurrentPosition[PieceHeldIndex];
-			if(mIndex != PieceHeldIndex)CurrentPosition[PieceHeldIndex] = 'x';
-			DisplayPosition = CurrentPosition.slice();
-			drawChessBoard(DisplayPosition);
-			PieceHeldIndex = -1;
+            let possibleMoves = GetPossiblePieceMoves(CurrentPosition, PieceHeldIndex, CurrentPosition[PieceHeldIndex]);
+            let isLegalMove = false;
+            for (let i = 0; i < possibleMoves.length; i++) {
+                if(possibleMoves[i].to == mIndex){
+                    isLegalMove = true;
+                    break;
+                }
+            }
+            if(isLegalMove){
+                CurrentPosition[mIndex] = CurrentPosition[PieceHeldIndex];
+                if(mIndex != PieceHeldIndex)CurrentPosition[PieceHeldIndex] = 'x';
+            }
+            DisplayPosition = CurrentPosition.slice();
+            PieceHeldIndex = -1;
+            drawChessBoard(DisplayPosition);
 			UpdateFenBar();
 			
 		}else{
@@ -281,4 +319,5 @@ function UpdateFenBar(){
 document.addEventListener('keydown', (event) => {
     if(event.key == 'f') boardFlipped = !boardFlipped;
     drawChessBoard(DisplayPosition);
+    if(event.key == 'x') GetPossiblePieceMoves(CurrentPosition, 9);
 });
