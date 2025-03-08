@@ -76,8 +76,8 @@ function incrementCounter() {
     }
 }
 
-var DisplayPosition = SlidingPieces.slice();
-setCurrentPosition(SlidingPieces.slice());
+var DisplayPosition = StartingPosition.slice();
+setCurrentPosition(StartingPosition.slice());
 
 function Start(){
 	SetPieceImages(PiecesImages);

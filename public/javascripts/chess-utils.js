@@ -62,6 +62,21 @@ export function PositionToFen(position){
 
 //credit for idea/function: Sebastian Lague
 var SqDirectionOffsets = [-8, 8, -1, 1, -9, -7, 7, 9]; // north, south, west, east, nw, ne, sw, se
+var SqKnightDirOffsets = [
+	-17, -15,
+	15, 17,
+	-10, 6,
+	-6, 10]; //north, south, west, east
+var SqKnightMinDistances = [ 
+	{up: 2, left: 1},
+	{up: 2, right: 1},
+	{down: 2, left: 1},
+	{down: 2, right: 1},
+	{left: 2, up: 1},
+	{left: 2, down: 1},
+	{right: 2, up: 1},
+	{right: 2, down: 1},
+];
 var SqEdgeDistances = [];
 function PrecomputeEdgeDistances(){
 	SqEdgeDistances = [];
@@ -122,11 +137,10 @@ export function GetPossiblePieceMoves(position, pieceIndex, piece){
 				// north, south, west, east, nw, sw, ne, se
 				let destinationIndex = pieceIndex;
 				if(SqEdgeDistances[pieceIndex][dir] == 0) continue;
-					destinationIndex += SqDirectionOffsets[dir];
-					let isDestWhite = position[destinationIndex].toUpperCase() == position[destinationIndex];
-					if(isWhite == isDestWhite && position[destinationIndex] != 'x') break;
-					pieceMoves.push({from: pieceIndex, to: destinationIndex});
-				
+				destinationIndex += SqDirectionOffsets[dir];
+				let isDestWhite = position[destinationIndex].toUpperCase() == position[destinationIndex];
+				if(isWhite == isDestWhite && position[destinationIndex] != 'x') break;
+				pieceMoves.push({from: pieceIndex, to: destinationIndex});
 			}
 			return pieceMoves;
 			break;
@@ -155,6 +169,56 @@ export function GetPossiblePieceMoves(position, pieceIndex, piece){
 					if(isWhite == isDestWhite && position[destinationIndex] != 'x') break;
 					pieceMoves.push({from: pieceIndex, to: destinationIndex});
 				}
+			}
+			return pieceMoves;
+			break;
+		case 'p':
+		case "P":
+			let range = 1;
+			console.log((isWhite && IndexToPosition(pieceIndex).y == 6) || 
+			(!isWhite && IndexToPosition(pieceIndex).y == 1));
+			if ((isWhite && IndexToPosition(pieceIndex).y == 6) || 
+				(!isWhite && IndexToPosition(pieceIndex).y == 1))
+			range = 2;
+			let dir = isWhite ? 0 : 1;
+			let destinationIndex = pieceIndex;
+			for (let dist = 0; dist < SqEdgeDistances[pieceIndex][dir]; dist++) {
+				let isDestWhite;
+				destinationIndex += SqDirectionOffsets[dir];
+				if(dist == 0){//capturing moves
+					if(position[destinationIndex-1] != 'x'){
+						isDestWhite = position[destinationIndex-1].toUpperCase() == position[destinationIndex-1];
+						if(isWhite != isDestWhite)
+							pieceMoves.push({from: pieceIndex, to: destinationIndex-1});
+					}
+					if(position[destinationIndex+1] != 'x'){
+						isDestWhite = position[destinationIndex-1].toUpperCase() == position[destinationIndex+1];
+						if(isWhite != isDestWhite)
+							pieceMoves.push({from: pieceIndex, to: destinationIndex+1});
+					}
+				}
+				if(dist >= range) break;
+				isDestWhite = position[destinationIndex].toUpperCase() == position[destinationIndex];
+				if(position[destinationIndex] != 'x') break;
+				pieceMoves.push({from: pieceIndex, to: destinationIndex});
+			}
+			return pieceMoves;
+			break;
+		case 'n':
+		case 'N':
+			for (let dir = 0; dir < 8; dir++) {
+				//absolute junk, but does for now
+				if(
+					(SqKnightMinDistances[dir].up != null && SqEdgeDistances[pieceIndex][0] < SqKnightMinDistances[dir].up) ||
+					(SqKnightMinDistances[dir].down != null && SqEdgeDistances[pieceIndex][1] < SqKnightMinDistances[dir].down) ||
+					(SqKnightMinDistances[dir].left != null && SqEdgeDistances[pieceIndex][2] < SqKnightMinDistances[dir].left) ||
+					(SqKnightMinDistances[dir].right != null && SqEdgeDistances[pieceIndex][3] < SqKnightMinDistances[dir].right))
+						continue;
+				let destinationIndex = pieceIndex;
+				destinationIndex += SqKnightDirOffsets[dir];
+				let isDestWhite = position[destinationIndex].toUpperCase() == position[destinationIndex];
+				if(isWhite == isDestWhite && position[destinationIndex] != 'x') continue;
+				pieceMoves.push({from: pieceIndex, to: destinationIndex});
 			}
 			return pieceMoves;
 			break;
