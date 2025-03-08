@@ -107,19 +107,61 @@ export function GetPossiblePieceMoves(position, pieceIndex, piece){
 
 				for (let dist = 0; dist < SqEdgeDistances[pieceIndex][dir]; dist++) {
 					destinationIndex += SqDirectionOffsets[dir];
-
+					console.log(position.length);
+					if(destinationIndex >= 63) break;
 					let isDestWhite = position[destinationIndex].toUpperCase() == position[destinationIndex];
-					if(isWhite == isDestWhite) break;
+					if(isWhite == isDestWhite && position[destinationIndex] != 'x') break;
 					pieceMoves.push({from: pieceIndex, to: destinationIndex});
-					}
+				}
+			}
+			return pieceMoves;
+			break;
+		case 'k':
+		case 'K':
+			for (let dir = 0; dir < 8; dir++) {
+				// north, south, west, east, nw, sw, ne, se
+				let destinationIndex = pieceIndex;
+				if(SqEdgeDistances[pieceIndex][dir] == 0) continue;
+					destinationIndex += SqDirectionOffsets[dir];
+					let isDestWhite = position[destinationIndex].toUpperCase() == position[destinationIndex];
+					if(isWhite == isDestWhite && position[destinationIndex] != 'x') break;
+					pieceMoves.push({from: pieceIndex, to: destinationIndex});
 				
+			}
+			return pieceMoves;
+			break;
+		case 'r':
+		case "R":
+			for (let dir = 0; dir < 4; dir++) {
+				//north, south, west, east
+				let destinationIndex = pieceIndex;
+				for (let dist = 0; dist < SqEdgeDistances[pieceIndex][dir]; dist++) {
+					destinationIndex += SqDirectionOffsets[dir];
+					let isDestWhite = position[destinationIndex].toUpperCase() == position[destinationIndex];
+					if(isWhite == isDestWhite && position[destinationIndex] != 'x') break;
+					pieceMoves.push({from: pieceIndex, to: destinationIndex});
+				}
+			}
+			return pieceMoves;
+			break;
+		case 'b':
+		case "B":
+			for (let dir = 4; dir < 8; dir++) {
+				//nw, sw, ne, se
+				let destinationIndex = pieceIndex;
+				for (let dist = 0; dist < SqEdgeDistances[pieceIndex][dir]; dist++) {
+					destinationIndex += SqDirectionOffsets[dir];
+					let isDestWhite = position[destinationIndex].toUpperCase() == position[destinationIndex];
+					if(isWhite == isDestWhite && position[destinationIndex] != 'x') break;
+					pieceMoves.push({from: pieceIndex, to: destinationIndex});
+				}
 			}
 			return pieceMoves;
 			break;
 		default:
 			return pieceMoves;
 	}
- }
+}
 
 //okay, I know, this is a hack - I do it because I don't want to move to TypeScript nor use Classes right now and still have something "struct-like" 
 function chessPiece(indexOnBoard, type, possibleMoves){
