@@ -7,6 +7,7 @@ var ColorSquareWhite = '#f0d9b5';
 var ColorSquareBlack = '#b58863';
 var ColorDestination = "rgba(0, 0, 0, 0.49)"
 var PiecesImages = [];
+var ChessSounds = [];
 var DisplayPosition = [];
 var boardFlipped = false; 
 
@@ -17,6 +18,11 @@ const CTX = CANVAS.getContext("2d");
 export function SetPieceImages(images){
     PiecesImages = images;
 }
+
+export function SetChessSounds(sounds){
+    ChessSounds = sounds;
+}
+
 
 function DrawSquare(x, y, w, h, color){
 	CTX.fillStyle = color;
@@ -265,13 +271,19 @@ function updateMousePosition(event){
 		if(!mouseOneDown){
             let possibleMoves = GetPossiblePieceMoves(CurrentPosition, PieceHeldIndex, CurrentPosition[PieceHeldIndex]);
             let isLegalMove = false;
+            let isCapture = false;
             for (let i = 0; i < possibleMoves.length; i++) {
                 if(possibleMoves[i].to == mIndex){
                     isLegalMove = true;
+                    if(possibleMoves[i].isCapture) isCapture = true;
                     break;
                 }
             }
             if(isLegalMove){
+                if(isCapture) 
+                    ChessSounds[1].play();
+                else 
+                    ChessSounds[0].play();
                 CurrentPosition[mIndex] = CurrentPosition[PieceHeldIndex];
                 if(mIndex != PieceHeldIndex)CurrentPosition[PieceHeldIndex] = 'x';
             }

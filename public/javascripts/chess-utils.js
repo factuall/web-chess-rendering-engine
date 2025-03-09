@@ -122,11 +122,11 @@ export function GetPossiblePieceMoves(position, pieceIndex, piece){
 
 				for (let dist = 0; dist < SqEdgeDistances[pieceIndex][dir]; dist++) {
 					destinationIndex += SqDirectionOffsets[dir];
-					console.log(position.length);
 					if(destinationIndex >= 63) break;
 					let isDestWhite = position[destinationIndex].toUpperCase() == position[destinationIndex];
-					if(isWhite == isDestWhite && position[destinationIndex] != 'x') break;
-					pieceMoves.push({from: pieceIndex, to: destinationIndex});
+					let isCapture = position[destinationIndex] != 'x';
+					if(isWhite == isDestWhite && isCapture) break;
+					pieceMoves.push({from: pieceIndex, to: destinationIndex, isCapture: isCapture});
 				}
 			}
 			return pieceMoves;
@@ -139,8 +139,9 @@ export function GetPossiblePieceMoves(position, pieceIndex, piece){
 				if(SqEdgeDistances[pieceIndex][dir] == 0) continue;
 				destinationIndex += SqDirectionOffsets[dir];
 				let isDestWhite = position[destinationIndex].toUpperCase() == position[destinationIndex];
-				if(isWhite == isDestWhite && position[destinationIndex] != 'x') break;
-				pieceMoves.push({from: pieceIndex, to: destinationIndex});
+				let isCapture = position[destinationIndex] != 'x';
+				if(isWhite == isDestWhite && isCapture) break;
+				pieceMoves.push({from: pieceIndex, to: destinationIndex, isCapture: isCapture});
 			}
 			return pieceMoves;
 			break;
@@ -152,8 +153,9 @@ export function GetPossiblePieceMoves(position, pieceIndex, piece){
 				for (let dist = 0; dist < SqEdgeDistances[pieceIndex][dir]; dist++) {
 					destinationIndex += SqDirectionOffsets[dir];
 					let isDestWhite = position[destinationIndex].toUpperCase() == position[destinationIndex];
-					if(isWhite == isDestWhite && position[destinationIndex] != 'x') break;
-					pieceMoves.push({from: pieceIndex, to: destinationIndex});
+					let isCapture = position[destinationIndex] != 'x';
+					if(isWhite == isDestWhite && isCapture) break;
+					pieceMoves.push({from: pieceIndex, to: destinationIndex, isCapture: isCapture});
 				}
 			}
 			return pieceMoves;
@@ -166,8 +168,9 @@ export function GetPossiblePieceMoves(position, pieceIndex, piece){
 				for (let dist = 0; dist < SqEdgeDistances[pieceIndex][dir]; dist++) {
 					destinationIndex += SqDirectionOffsets[dir];
 					let isDestWhite = position[destinationIndex].toUpperCase() == position[destinationIndex];
-					if(isWhite == isDestWhite && position[destinationIndex] != 'x') break;
-					pieceMoves.push({from: pieceIndex, to: destinationIndex});
+					let isCapture = position[destinationIndex] != 'x';
+					if(isWhite == isDestWhite && isCapture) break;
+					pieceMoves.push({from: pieceIndex, to: destinationIndex, isCapture: isCapture});
 				}
 			}
 			return pieceMoves;
@@ -175,8 +178,6 @@ export function GetPossiblePieceMoves(position, pieceIndex, piece){
 		case 'p':
 		case "P":
 			let range = 1;
-			console.log((isWhite && IndexToPosition(pieceIndex).y == 6) || 
-			(!isWhite && IndexToPosition(pieceIndex).y == 1));
 			if ((isWhite && IndexToPosition(pieceIndex).y == 6) || 
 				(!isWhite && IndexToPosition(pieceIndex).y == 1))
 			range = 2;
@@ -189,18 +190,18 @@ export function GetPossiblePieceMoves(position, pieceIndex, piece){
 					if(position[destinationIndex-1] != 'x'){
 						isDestWhite = position[destinationIndex-1].toUpperCase() == position[destinationIndex-1];
 						if(isWhite != isDestWhite)
-							pieceMoves.push({from: pieceIndex, to: destinationIndex-1});
+							pieceMoves.push({from: pieceIndex, to: destinationIndex-1, isCapture: true});
 					}
 					if(position[destinationIndex+1] != 'x'){
 						isDestWhite = position[destinationIndex-1].toUpperCase() == position[destinationIndex+1];
 						if(isWhite != isDestWhite)
-							pieceMoves.push({from: pieceIndex, to: destinationIndex+1});
+							pieceMoves.push({from: pieceIndex, to: destinationIndex+1, isCapture: true});
 					}
 				}
 				if(dist >= range) break;
 				isDestWhite = position[destinationIndex].toUpperCase() == position[destinationIndex];
 				if(position[destinationIndex] != 'x') break;
-				pieceMoves.push({from: pieceIndex, to: destinationIndex});
+				pieceMoves.push({from: pieceIndex, to: destinationIndex, isCapture: false});
 			}
 			return pieceMoves;
 			break;
@@ -217,8 +218,9 @@ export function GetPossiblePieceMoves(position, pieceIndex, piece){
 				let destinationIndex = pieceIndex;
 				destinationIndex += SqKnightDirOffsets[dir];
 				let isDestWhite = position[destinationIndex].toUpperCase() == position[destinationIndex];
-				if(isWhite == isDestWhite && position[destinationIndex] != 'x') continue;
-				pieceMoves.push({from: pieceIndex, to: destinationIndex});
+				let isCapture = position[destinationIndex] != 'x';
+				if(isWhite == isDestWhite && isCapture) break;
+				pieceMoves.push({from: pieceIndex, to: destinationIndex, isCapture: isCapture});
 			}
 			return pieceMoves;
 			break;

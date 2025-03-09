@@ -1,6 +1,6 @@
 import {DEBUG_SHOWPOS_ONHOVER, SquareSize, PieceSize, CurrentPosition, setCurrentPosition} from "./globals.js"
 import {InterpretFen, PositionToFen} from "./chess-utils.js"
-import { SetPieceImages, drawChessBoard } from "./board.js"
+import { SetChessSounds, SetPieceImages, drawChessBoard } from "./board.js"
 
 //PUBLIC FLAGS
 var whiteMoves = true;
@@ -23,6 +23,7 @@ let SlidingPieces = InterpretFen('8/1QrBb3/8/8/8/4K3/8/8 w KQkq - 0 1');
 
 
 let PiecesImages = [];
+let ChessSounds = [];
 //https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces
 //kK/qQ/rR/nN/bB/pP//
 function LoadPieces(){
@@ -58,15 +59,32 @@ function LoadPieces(){
 	
 }
 
+//only soundset available: chesscom
+//move/capture/castle/game-start/game-end/
+function LoadSounds(soundSet){
+	ChessSounds.push(new Audio());
+	ChessSounds[0].src = `/sounds/${soundSet}/move.wav`;
+	ChessSounds.push(new Audio());
+	ChessSounds[1].src = `/sounds/${soundSet}/capture.wav`;
+	ChessSounds.push(new Audio());
+	ChessSounds[2].src = `/sounds/${soundSet}/castle.wav`;
+	ChessSounds.push(new Audio());
+	ChessSounds[3].src = `/sounds/${soundSet}/game-start.wav`;
+	ChessSounds.push(new Audio());
+	ChessSounds[3].src = `/sounds/${soundSet}/game-end.wav`;
+}
+
 LoadPieces();
+LoadSounds("chesscom");
+let allAssets = PiecesImages.concat(ChessSounds);
 var len = PiecesImages.length,
     counter = 0;
 
-[].forEach.call( PiecesImages, function( img ) {
-    if(img.complete)
+[].forEach.call( allAssets, function( asset ) {
+    if(asset.complete)
       incrementCounter();
     else
-      img.addEventListener( 'load', incrementCounter, false );
+      asset.addEventListener( 'load', incrementCounter, false );
 } );
 
 function incrementCounter() {
@@ -81,6 +99,7 @@ setCurrentPosition(StartingPosition.slice());
 
 function Start(){
 	SetPieceImages(PiecesImages);
+	SetChessSounds(ChessSounds);
 	drawChessBoard(DisplayPosition);
 	PositionToFen(CurrentPosition);
 }
