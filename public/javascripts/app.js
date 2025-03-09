@@ -2,9 +2,6 @@ import {DEBUG_SHOWPOS_ONHOVER, SquareSize, PieceSize, CurrentPosition, setCurren
 import {InterpretFen, PositionToFen} from "./chess-utils.js"
 import { SetChessSounds, SetPieceImages, drawChessBoard } from "./board.js"
 
-//PUBLIC FLAGS
-var whiteMoves = true;
-
 const CANVAS = document.getElementById("board-canvas");
 
 const CTX = CANVAS.getContext("2d");
@@ -101,5 +98,4 @@ function Start(){
 	SetPieceImages(PiecesImages);
 	SetChessSounds(ChessSounds);
 	drawChessBoard(DisplayPosition);
-	PositionToFen(CurrentPosition);
 }

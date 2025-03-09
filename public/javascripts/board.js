@@ -1,4 +1,4 @@
-import {DEBUG_SHOW_NUMBERS, DEBUG_SHOWPOS_ONHOVER, APPLY_CHESS_RULES, CurrentPosition, ShowPositionSideCharacters} from "./globals.js";
+import {DEBUG_SHOW_NUMBERS, DEBUG_SHOWPOS_ONHOVER, APPLY_CHESS_RULES, CurrentPosition, ShowPositionSideCharacters, GameState, playerMoved, kingMoved, rookMoved} from "./globals.js";
 import { PositionToFen, GetPossiblePieceMoves, IndexToPosition } from "./chess-utils.js";
 
 var SquareSize = 100;
@@ -272,20 +272,40 @@ function updateMousePosition(event){
             let possibleMoves = GetPossiblePieceMoves(CurrentPosition, PieceHeldIndex, CurrentPosition[PieceHeldIndex]);
             let isLegalMove = false;
             let isCapture = false;
+            let selectedMove;
             for (let i = 0; i < possibleMoves.length; i++) {
                 if(possibleMoves[i].to == mIndex){
                     isLegalMove = true;
+                    selectedMove = possibleMoves[i];
                     if(possibleMoves[i].isCapture) isCapture = true;
                     break;
                 }
             }
             if(isLegalMove){
+                playerMoved(); //flip whiteMoves, I have to come up with better name for this function
                 if(isCapture) 
                     ChessSounds[1].play();
                 else 
                     ChessSounds[0].play();
+                
+                //losing castle rights after moving a king
+                if(CurrentPosition[PieceHeldIndex] == 'K'){
+                    kingMoved(true);
+                }
+                if(CurrentPosition[PieceHeldIndex] == 'k'){
+                    kingMoved(false);
+                }
+
+                //rook moved
+                if(selectedMove.from == 56) rookMoved(true, false)//a1
+                if(selectedMove.from == 63) rookMoved(true, true)//h1
+                if(selectedMove.from == 0) rookMoved(false, false)//a8
+                if(selectedMove.from == 7) rookMoved(false, true)//h8
+
+
                 CurrentPosition[mIndex] = CurrentPosition[PieceHeldIndex];
                 if(mIndex != PieceHeldIndex)CurrentPosition[PieceHeldIndex] = 'x';
+
             }
             DisplayPosition = CurrentPosition.slice();
             PieceHeldIndex = -1;

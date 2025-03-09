@@ -1,3 +1,5 @@
+import { GameState, getGameState } from "./globals.js"
+
 export function InterpretFen(fen){
 	let positions = [];
 	let ntFragments = fen.split(" ");
@@ -26,7 +28,7 @@ export function IndexToPosition(index){
 	return {x, y};
 }
 
-export function PositionToFen(position){
+export function PositionToFen(position, GameState){
 	let fen = "";
 	for (let posY = 0; posY < 8; posY++) {
 		
@@ -56,7 +58,18 @@ export function PositionToFen(position){
 		}
 		if(posY < 7) fen += '/';
 	}
-	fen += " !TODO!";
+	let lGameState = getGameState(); 
+	let colorMoving = lGameState.whiteMoves ? 'w' : 'b';
+	fen += ` ${colorMoving} `;
+	if(	!lGameState.canWhiteCastleK && !lGameState.canWhiteCastleQ && !lGameState.canBlackCastleK && !lGameState.canBlackCastleQ){
+		fen += '- ';
+	}else{
+		if(lGameState.canWhiteCastleK) fen += 'K';
+		if(lGameState.canWhiteCastleQ) fen += 'Q';
+		if(lGameState.canBlackCastleK) fen += 'k';
+		if(lGameState.canBlackCastleQ) fen += 'q';
+		fen += ' ';
+	}
 	return fen;
 }
 
@@ -110,6 +123,9 @@ PrecomputeEdgeDistances();
 export function GetPossiblePieceMoves(position, pieceIndex, piece){
 	let pieceMoves = [];
 	let isWhite = (piece.toUpperCase() == piece); 
+	if(GameState.whiteMoves && !isWhite) return pieceMoves;
+	
+	if(!GameState.whiteMoves && isWhite) return pieceMoves;
 	if(piece == 'x') return pieceMoves;
 	switch(piece){
 		case 'x':
@@ -176,7 +192,7 @@ export function GetPossiblePieceMoves(position, pieceIndex, piece){
 			return pieceMoves;
 			break;
 		case 'p':
-		case "P":
+		case "P": //TODO: prevent from capturing a piece on the other side of the board caused by the board-table wrapping
 			let range = 1;
 			if ((isWhite && IndexToPosition(pieceIndex).y == 6) || 
 				(!isWhite && IndexToPosition(pieceIndex).y == 1))
@@ -193,7 +209,7 @@ export function GetPossiblePieceMoves(position, pieceIndex, piece){
 							pieceMoves.push({from: pieceIndex, to: destinationIndex-1, isCapture: true});
 					}
 					if(position[destinationIndex+1] != 'x'){
-						isDestWhite = position[destinationIndex-1].toUpperCase() == position[destinationIndex+1];
+						isDestWhite = position[destinationIndex+1].toUpperCase() == position[destinationIndex+1];
 						if(isWhite != isDestWhite)
 							pieceMoves.push({from: pieceIndex, to: destinationIndex+1, isCapture: true});
 					}

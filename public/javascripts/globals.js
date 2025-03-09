@@ -13,3 +13,36 @@ export function setCurrentPosition(position){
 export function toggleSideCharacters(){
     ShowPositionSideCharacters = !ShowPositionSideCharacters;
 }
+
+export const GameState = {
+	whiteMoves: true,
+	canWhiteCastleQ: true,
+	canBlackCastleQ: true,
+	canWhiteCastleK: true,
+	canBlackCastleK: true,
+};
+
+export function playerMoved(){
+    GameState.whiteMoves = !GameState.whiteMoves;
+}
+
+export function getGameState(){
+    return GameState;
+}
+
+export function kingMoved(isWhite){
+    if(isWhite){
+        GameState.canWhiteCastleK = false;
+        GameState.canWhiteCastleQ = false;
+    }else{
+        GameState.canBlackCastleK = false;
+        GameState.canBlackCastleQ = false;
+    }
+}
+
+export function rookMoved(isWhite, isKingSide){
+    if(isKingSide && isWhite) GameState.canWhiteCastleK = false;
+    if(!isKingSide && isWhite) GameState.canWhiteCastleQ = false;
+    if(isKingSide && !isWhite) GameState.canBlackCastleK = false;
+    if(!isKingSide && !isWhite) GameState.canBlackCastleQ = false;
+}
