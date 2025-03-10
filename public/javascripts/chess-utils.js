@@ -120,21 +120,64 @@ function PrecomputeEdgeDistances(){
 PrecomputeEdgeDistances();
 
 export function GetLegalMoves(gameState){
+	gameState = getGameState();
 	let position = getGameState().position;
+	let whiteKingPos = -1, blackKingPos = -1; //start with negative number as we did not find anything yer
+	for (let p = 0; p < 64; p++) {
+		if(position[p] == 'K')
+			whiteKingPos = p;
+		if(position[p] == 'k')
+			blackKingPos = p;
+		if(whiteKingPos > -1 && blackKingPos > -1) //both kings found
+			break;
+	}
+
+	let allPieceMoves = GetAllPseudoLegalMoves(gameState);
+	let allLegalMoves = allPieceMoves.slice();
+	let allNewPositions = getAllPossiblePositions(gameState.position, allPieceMoves);
+	let imaginaryGameState;
+	let movesRemoved = 0;
+	for (let pos = 0; pos < allNewPositions.length; pos++) {
+		//TODO: take account of the fact that the castle abilities might change in some of these positions
+		
+		imaginaryGameState = structuredClone(gameState);
+		imaginaryGameState.whiteMoves = !gameState.whiteMoves;
+		imaginaryGameState.position = allNewPositions[pos];
+		console.log(allNewPositions[pos]);
+		let imaginaryMoves = GetAllPseudoLegalMoves(imaginaryGameState);
+		for (let iM = 0; iM < imaginaryMoves.length; iM++) {
+			
+
+
+
+
+			/*if(!imaginaryMoves[iM].isCapture) continue;
+
+			console.log(imaginaryMoves[iM], imaginaryGameState.position[imaginaryMoves[iM].from], imaginaryGameState.whiteMoves);
+			if((imaginaryMoves[iM].to == whiteKingPos && !imaginaryGameState.whiteMoves) ||
+			(imaginaryMoves[iM].to == blackKingPos && imaginaryGameState.whiteMoves)){
+				console.log(allLegalMoves[pos], imaginaryMoves[iM]);
+				allLegalMoves = allLegalMoves.splice(pos-movesRemoved, 1);
+				movesRemoved += 1;
+			}*/
+		}
+	}
+	return allLegalMoves;
+}
+
+function GetAllPseudoLegalMoves(gameState){
+	let position = gameState.position;
 	let allPieceMoves = [];
-	let legalMoves = [];
 	for (let i = 0; i < 64; i++) {
 		if(position[i] == 'x') continue;
 		if(!isPieceWhite(position[i]) && gameState.whiteMoves) continue;
 		let pieceMoves = GetPossiblePieceMoves(position, i, position[i]);
 		allPieceMoves = allPieceMoves.concat(pieceMoves);
 	}
-	console.log("GetLegalMoves");
 	return allPieceMoves;
 }
 
 export function GetPossiblePieceMoves(position, pieceIndex, piece){
-	console.log("GetPossiblePieceMoves");
 	let pieceMoves = [];
 	let isWhite = (piece.toUpperCase() == piece); 
 	if(GameState.whiteMoves && !isWhite) return pieceMoves;
@@ -401,3 +444,14 @@ export function isPieceWhite(piece){
 }
 
 console.log(SqEdgeDistances);
+
+function getAllPossiblePositions(position, moves){
+	let possiblePositions = [];
+	for (let i = 0; i < moves.length; i++) {
+		let newPosition = position.slice();
+		newPosition[moves[i].to] = newPosition[moves[i].from];
+		newPosition[moves[i].from] = 'x';
+		possiblePositions.push(newPosition);
+	}
+	return possiblePositions;
+}

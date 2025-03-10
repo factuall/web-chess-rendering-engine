@@ -17,7 +17,7 @@ document.fonts.add(fontRobotoFile);
 let StartingPosition = InterpretFen('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
 let TwokingsPosition = InterpretFen('3k4/8/8/8/8/4K3/8/8 w KQkq - 0 1');
 let SlidingPieces = InterpretFen('8/1QrBb3/8/8/8/4K3/8/8 w KQkq - 0 1');
-let testPosition = InterpretFen('1n3n2/8/8/4ppp1/1PPP4/8/8/1N4N1 w HAha - 0 1');
+let testPosition = InterpretFen('4k3/8/8/4r3/8/4R3/8/4K3 w - - 0 1');
 let twoKnights = InterpretFen('5n2/8/8/8/8/8/8/1N6 w HAha - 0 1');
 
 
@@ -93,8 +93,8 @@ function incrementCounter() {
     }
 }
 
-var DisplayPosition = StartingPosition.slice();
-setCurrentPosition(StartingPosition.slice());
+var DisplayPosition = testPosition.slice();
+setCurrentPosition(testPosition.slice());
 
 function Start(){
 	SetPieceImages(PiecesImages);
