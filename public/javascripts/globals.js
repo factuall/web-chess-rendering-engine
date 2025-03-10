@@ -7,7 +7,7 @@ export var PieceSize = 98;
 export var CurrentPosition = [];
 
 export function setCurrentPosition(position){
-    CurrentPosition = position;
+    GameState.position = position;
 }
 
 export function toggleSideCharacters(){
@@ -15,6 +15,8 @@ export function toggleSideCharacters(){
 }
 
 export const GameState = {
+    position: [],
+    legalMoves: [],
 	whiteMoves: true,
 	canWhiteCastleQ: true,
 	canBlackCastleQ: true,

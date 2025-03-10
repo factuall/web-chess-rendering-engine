@@ -119,7 +119,147 @@ function PrecomputeEdgeDistances(){
 }
 PrecomputeEdgeDistances();
 
+export function GetLegalMoves(gameState){
+	let position = getGameState().position;
+	let allPieceMoves = [];
+	let legalMoves = [];
+	for (let i = 0; i < 64; i++) {
+		if(position[i] == 'x') continue;
+		if(!isPieceWhite(position[i]) && gameState.whiteMoves) continue;
+		let pieceMoves = GetPossiblePieceMoves(position, i, position[i]);
+		allPieceMoves = allPieceMoves.concat(pieceMoves);
+	}
+	console.log("GetLegalMoves");
+	return allPieceMoves;
+}
 
+export function GetPossiblePieceMoves(position, pieceIndex, piece){
+	console.log("GetPossiblePieceMoves");
+	let pieceMoves = [];
+	let isWhite = (piece.toUpperCase() == piece); 
+	if(GameState.whiteMoves && !isWhite) return pieceMoves;
+	
+	if(!GameState.whiteMoves && isWhite) return pieceMoves;
+	if(piece == 'x') return pieceMoves;
+	switch(piece){
+		case 'x':
+			return pieceMoves;
+		case 'q':
+		case 'Q':
+			for (let dir = 0; dir < 8; dir++) {
+				// north, south, west, east, nw, sw, ne, se
+				let destinationIndex = pieceIndex;
+
+				for (let dist = 0; dist < SqEdgeDistances[pieceIndex][dir]; dist++) {
+					destinationIndex += SqDirectionOffsets[dir];
+					if(destinationIndex >= 63) break;
+					let isDestWhite = position[destinationIndex].toUpperCase() == position[destinationIndex];
+					let isCapture = position[destinationIndex] != 'x';
+					if(isWhite == isDestWhite && isCapture) break;
+					pieceMoves.push({from: pieceIndex, to: destinationIndex, isCapture: isCapture});
+				}
+			}
+			return pieceMoves;
+			break;
+		case 'k':
+		case 'K':
+			for (let dir = 0; dir < 8; dir++) {
+				// north, south, west, east, nw, sw, ne, se
+				let destinationIndex = pieceIndex;
+				if(SqEdgeDistances[pieceIndex][dir] == 0) continue;
+				destinationIndex += SqDirectionOffsets[dir];
+				let isDestWhite = position[destinationIndex].toUpperCase() == position[destinationIndex];
+				let isCapture = position[destinationIndex] != 'x';
+				if(isWhite == isDestWhite && isCapture) break;
+				pieceMoves.push({from: pieceIndex, to: destinationIndex, isCapture: isCapture});
+			}
+			return pieceMoves;
+			break;
+		case 'r':
+		case "R":
+			for (let dir = 0; dir < 4; dir++) {
+				//north, south, west, east
+				let destinationIndex = pieceIndex;
+				for (let dist = 0; dist < SqEdgeDistances[pieceIndex][dir]; dist++) {
+					destinationIndex += SqDirectionOffsets[dir];
+					let isDestWhite = position[destinationIndex].toUpperCase() == position[destinationIndex];
+					let isCapture = position[destinationIndex] != 'x';
+					if(isWhite == isDestWhite && isCapture) break;
+					pieceMoves.push({from: pieceIndex, to: destinationIndex, isCapture: isCapture});
+				}
+			}
+			return pieceMoves;
+			break;
+		case 'b':
+		case "B":
+			for (let dir = 4; dir < 8; dir++) {
+				//nw, sw, ne, se
+				let destinationIndex = pieceIndex;
+				for (let dist = 0; dist < SqEdgeDistances[pieceIndex][dir]; dist++) {
+					destinationIndex += SqDirectionOffsets[dir];
+					let isDestWhite = position[destinationIndex].toUpperCase() == position[destinationIndex];
+					let isCapture = position[destinationIndex] != 'x';
+					if(isWhite == isDestWhite && isCapture) break;
+					pieceMoves.push({from: pieceIndex, to: destinationIndex, isCapture: isCapture});
+				}
+			}
+			return pieceMoves;
+			break;
+		case 'p':
+		case "P": //TODO: prevent from capturing a piece on the other side of the board caused by the board-table wrapping
+			let range = 1;
+			if ((isWhite && IndexToPosition(pieceIndex).y == 6) || 
+				(!isWhite && IndexToPosition(pieceIndex).y == 1))
+			range = 2;
+			let dir = isWhite ? 0 : 1;
+			let destinationIndex = pieceIndex;
+			for (let dist = 0; dist < SqEdgeDistances[pieceIndex][dir]; dist++) {
+				let isDestWhite;
+				destinationIndex += SqDirectionOffsets[dir];
+				if(dist == 0){//capturing moves
+					if(position[destinationIndex-1] != 'x'){
+						isDestWhite = position[destinationIndex-1].toUpperCase() == position[destinationIndex-1];
+						if(isWhite != isDestWhite)
+							pieceMoves.push({from: pieceIndex, to: destinationIndex-1, isCapture: true});
+					}
+					if(position[destinationIndex+1] != 'x'){
+						isDestWhite = position[destinationIndex+1].toUpperCase() == position[destinationIndex+1];
+						if(isWhite != isDestWhite)
+							pieceMoves.push({from: pieceIndex, to: destinationIndex+1, isCapture: true});
+					}
+				}
+				if(dist >= range) break;
+				isDestWhite = position[destinationIndex].toUpperCase() == position[destinationIndex];
+				if(position[destinationIndex] != 'x') break;
+				pieceMoves.push({from: pieceIndex, to: destinationIndex, isCapture: false});
+			}
+			return pieceMoves;
+			break;
+		case 'n':
+		case 'N':
+			for (let dir = 0; dir < 8; dir++) {
+				//absolute junk, but does for now
+				if(
+					(SqKnightMinDistances[dir].up != null && SqEdgeDistances[pieceIndex][0] < SqKnightMinDistances[dir].up) ||
+					(SqKnightMinDistances[dir].down != null && SqEdgeDistances[pieceIndex][1] < SqKnightMinDistances[dir].down) ||
+					(SqKnightMinDistances[dir].left != null && SqEdgeDistances[pieceIndex][2] < SqKnightMinDistances[dir].left) ||
+					(SqKnightMinDistances[dir].right != null && SqEdgeDistances[pieceIndex][3] < SqKnightMinDistances[dir].right))
+						continue;
+				let destinationIndex = pieceIndex;
+				destinationIndex += SqKnightDirOffsets[dir];
+				let isDestWhite = isPieceWhite(position[destinationIndex]);
+				let isCapture = position[destinationIndex] != 'x';
+				if(isWhite == isDestWhite && isCapture) continue;
+				pieceMoves.push({from: pieceIndex, to: destinationIndex, isCapture: isCapture});
+			}
+			return pieceMoves;
+			break;
+		default:
+			return pieceMoves;
+	}
+}
+
+/*
 export function GetPossiblePieceMoves(position, pieceIndex, piece){
 	let pieceMoves = [];
 	let isWhite = (piece.toUpperCase() == piece); 
@@ -245,6 +385,8 @@ export function GetPossiblePieceMoves(position, pieceIndex, piece){
 	}
 }
 
+*/
+
 //okay, I know, this is a hack - I do it because I don't want to move to TypeScript nor use Classes right now and still have something "struct-like" 
 function chessPiece(indexOnBoard, type, possibleMoves){
 	return {index: indexOnBoard, type: type, moves: possibleMoves};
@@ -252,6 +394,10 @@ function chessPiece(indexOnBoard, type, possibleMoves){
 
 function move(indexFrom, indexTo){
 	return {from: indexFrom, to: indexTo};
+}
+
+export function isPieceWhite(piece){
+	return piece.toUpperCase() == piece;
 }
 
 console.log(SqEdgeDistances);

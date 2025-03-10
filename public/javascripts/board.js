@@ -1,15 +1,15 @@
-import {DEBUG_SHOW_NUMBERS, DEBUG_SHOWPOS_ONHOVER, APPLY_CHESS_RULES, CurrentPosition, ShowPositionSideCharacters, GameState, playerMoved, kingMoved, rookMoved} from "./globals.js";
-import { PositionToFen, GetPossiblePieceMoves, IndexToPosition } from "./chess-utils.js";
+import {DEBUG_SHOW_NUMBERS, DEBUG_SHOWPOS_ONHOVER, APPLY_CHESS_RULES, CurrentPosition, ShowPositionSideCharacters, GameState, playerMoved, kingMoved, rookMoved, getGameState} from "./globals.js";
+import { PositionToFen, GetPossiblePieceMoves, IndexToPosition, GetLegalMoves } from "./chess-utils.js";
 
-var SquareSize = 100;
-var PieceSize = 98;
-var ColorSquareWhite = '#f0d9b5';
-var ColorSquareBlack = '#b58863';
-var ColorDestination = "rgba(0, 0, 0, 0.49)"
-var PiecesImages = [];
-var ChessSounds = [];
-var DisplayPosition = [];
-var boardFlipped = false; 
+let SquareSize = 100;
+let PieceSize = 98;
+let ColorSquareWhite = '#f0d9b5';
+let ColorSquareBlack = '#b58863';
+let ColorDestination = "rgba(0, 0, 0, 0.49)"
+let PiecesImages = [];
+let ChessSounds = [];
+let DisplayPosition = [];
+let boardFlipped = false; 
 
 const CANVAS = document.getElementById("board-canvas");
 
@@ -104,8 +104,10 @@ export function drawChessBoard(position){
     DisplayPosition = position.slice();
     drawBoard(boardFlipped);
     drawPieces(position, boardFlipped);
-    if(PieceHeldIndex != -1)
-    drawDestinations(GetPossiblePieceMoves(CurrentPosition, PieceHeldIndex, CurrentPosition[PieceHeldIndex]), boardFlipped);
+    if(pieceHeldIndex != -1){
+        drawDestinations(pieceHeldMoves, boardFlipped);
+
+    }
     
 }
 
@@ -198,8 +200,8 @@ const mouseAbsolute = {x: 0, y: 0};
 const mouseSq = {x: 0, y: 0};
 let mouseOneDown = false;
 let mouseTwoDown = false;
-let PieceHeldIndex = -1;
-let PieceHeld = '';
+let pieceHeldIndex = -1;
+let pieceHeldMoves = [];
 
 let rerender = false; //set true if next mouse update needs board rerendered 
 let ignoreMOne = false; //used to prevent user from pressing m1 on empty square, moving to another square and then getting a piece grabbed 
@@ -209,7 +211,7 @@ function updateMousePosition(event){
 		rerender = false;
 	}
 	
-    var dot, eventDoc, doc, body, pageX, pageY;
+    let dot, eventDoc, doc, body, pageX, pageY;
 	let rect = CANVAS.getBoundingClientRect();
     event = event || window.event; // IE-ism
 
@@ -235,6 +237,10 @@ function updateMousePosition(event){
     mouse.x = event.pageX - rect.left;
     mouse.y = event.pageY - rect.top;
 
+    updateMouse();
+}
+
+function updateMouse(){
 	let mSqX = Math.floor(mouse.x / SquareSize);
 	let mSqY = Math.floor(mouse.y / SquareSize);
 
@@ -243,20 +249,23 @@ function updateMousePosition(event){
 	mouseSq.x = mSqX;
 	mouseSq.y = mSqY;
 
-
-
-	let mIndex = (mSqX + (mSqY * 8));
+    let mIndex = (mSqX + (mSqY * 8));
 
 	if(mSqX < 0 || mSqX > 7 || mSqY < 0 || mSqY > 7) return;
 	
     if(boardFlipped) mIndex = 63-mIndex;
-	if(PieceHeldIndex == -1){ //no piece held
+	if(pieceHeldIndex == -1){ //no piece held
 		if(mouseOneDown){
-			if(CurrentPosition[mIndex] != 'x' && !ignoreMOne){
+			if(GameState.position[mIndex] != 'x' && !ignoreMOne){
 				DisplayPosition[mIndex] = 'x';
-				PieceHeldIndex = mIndex;
+				pieceHeldIndex = mIndex;
+                pieceHeldMoves = [];
+                for (let move = 0; move < GameState.legalMoves.length; move++) {
+                    if(GameState.legalMoves[move].from == pieceHeldIndex)
+                        pieceHeldMoves.push(GameState.legalMoves[move]);
+                }
 				drawChessBoard(DisplayPosition);
-				DrawPieceAbs(mouse.x - (PieceSize/2), mouse.y - (PieceSize/2), CurrentPosition[PieceHeldIndex]);
+				DrawPieceAbs(mouse.x - (PieceSize/2), mouse.y - (PieceSize/2), GameState.position[pieceHeldIndex]);
 				rerender = true;
 			}
 			else{
@@ -269,15 +278,16 @@ function updateMousePosition(event){
 		
 	}else{//piece held
 		if(!mouseOneDown){
-            let possibleMoves = GetPossiblePieceMoves(CurrentPosition, PieceHeldIndex, CurrentPosition[PieceHeldIndex]);
+            let gs = getGameState();
             let isLegalMove = false;
             let isCapture = false;
             let selectedMove;
-            for (let i = 0; i < possibleMoves.length; i++) {
-                if(possibleMoves[i].to == mIndex){
+            for (let i = 0; i < gs.legalMoves.length; i++) {
+                if( gs.legalMoves[i].from == pieceHeldIndex &&
+                    gs.legalMoves[i].to == mIndex){
                     isLegalMove = true;
-                    selectedMove = possibleMoves[i];
-                    if(possibleMoves[i].isCapture) isCapture = true;
+                    selectedMove = gs.legalMoves[i];
+                    if(gs.legalMoves[i].isCapture) isCapture = true;
                     break;
                 }
             }
@@ -289,10 +299,10 @@ function updateMousePosition(event){
                     ChessSounds[0].play();
                 
                 //losing castle rights after moving a king
-                if(CurrentPosition[PieceHeldIndex] == 'K'){
+                if(GameState.position[pieceHeldIndex] == 'K'){
                     kingMoved(true);
                 }
-                if(CurrentPosition[PieceHeldIndex] == 'k'){
+                if(GameState.position[pieceHeldIndex] == 'k'){
                     kingMoved(false);
                 }
 
@@ -303,21 +313,20 @@ function updateMousePosition(event){
                 if(selectedMove.from == 7) rookMoved(false, true)//h8
 
 
-                CurrentPosition[mIndex] = CurrentPosition[PieceHeldIndex];
-                if(mIndex != PieceHeldIndex)CurrentPosition[PieceHeldIndex] = 'x';
-
+                GameState.position[mIndex] = GameState.position[pieceHeldIndex];
+                if(mIndex != pieceHeldIndex)GameState.position[pieceHeldIndex] = 'x';
+                GameState.legalMoves = GetLegalMoves(GameState.position);
             }
-            DisplayPosition = CurrentPosition.slice();
-            PieceHeldIndex = -1;
+            DisplayPosition = GameState.position.slice();
+            pieceHeldIndex = -1;
             drawChessBoard(DisplayPosition);
 			UpdateFenBar();
 			
 		}else{
-			DrawPieceAbs(mouse.x - (PieceSize/2), mouse.y - (PieceSize/2), CurrentPosition[PieceHeldIndex]);
+			DrawPieceAbs(mouse.x - (PieceSize/2), mouse.y - (PieceSize/2), GameState.position[pieceHeldIndex]);
 			rerender = true;
 		}
 	}
-	
 }
 
 CANVAS.addEventListener('mousedown', function(event){
@@ -326,6 +335,7 @@ CANVAS.addEventListener('mousedown', function(event){
     }else{
         mouseTwoDown = true;
     }
+    updateMouse();
 });
 
 CANVAS.addEventListener('mouseup', function(event){
@@ -339,17 +349,17 @@ CANVAS.addEventListener('mouseup', function(event){
 let FenInput = document.getElementById("fen-input");
 function ApplyFen(){
 	setCurrentPosition(InterpretFen(FenInput.value));
-	DisplayPosition = CurrentPosition.slice();
+	DisplayPosition = GameState.position.slice();
 	drawChessBoard(DisplayPosition);
 }
 
 function UpdateFenBar(){
     if(FenInput != null)
-	FenInput.value = PositionToFen(CurrentPosition);
+	FenInput.value = PositionToFen(GameState.position);
 }
 
 document.addEventListener('keydown', (event) => {
     if(event.key == 'f') boardFlipped = !boardFlipped;
     drawChessBoard(DisplayPosition);
-    if(event.key == 'x') GetPossiblePieceMoves(CurrentPosition, 9);
+    if(event.key == 'x') GetPossiblePieceMoves(GameState.position, 9);
 });
