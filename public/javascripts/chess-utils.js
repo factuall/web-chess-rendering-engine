@@ -134,6 +134,7 @@ export function GetLegalMoves(gameState){
 
 	let allPieceMoves = GetAllPseudoLegalMoves(gameState);
 	let allLegalMoves = allPieceMoves.slice();
+	console.log(allLegalMoves);
 	let allNewPositions = getAllPossiblePositions(gameState.position, allPieceMoves);
 	let imaginaryGameState;
 	let movesRemoved = 0;
@@ -143,23 +144,20 @@ export function GetLegalMoves(gameState){
 		imaginaryGameState = structuredClone(gameState);
 		imaginaryGameState.whiteMoves = !gameState.whiteMoves;
 		imaginaryGameState.position = allNewPositions[pos];
-		console.log(allNewPositions[pos]);
+		//console.log(allNewPositions[pos]);
 		let imaginaryMoves = GetAllPseudoLegalMoves(imaginaryGameState);
 		for (let iM = 0; iM < imaginaryMoves.length; iM++) {
-			
+			if(!imaginaryMoves[iM].isCapture) continue;
 
-
-
-
-			/*if(!imaginaryMoves[iM].isCapture) continue;
-
-			console.log(imaginaryMoves[iM], imaginaryGameState.position[imaginaryMoves[iM].from], imaginaryGameState.whiteMoves);
 			if((imaginaryMoves[iM].to == whiteKingPos && !imaginaryGameState.whiteMoves) ||
 			(imaginaryMoves[iM].to == blackKingPos && imaginaryGameState.whiteMoves)){
-				console.log(allLegalMoves[pos], imaginaryMoves[iM]);
-				allLegalMoves = allLegalMoves.splice(pos-movesRemoved, 1);
+				console.log(allPieceMoves[pos], imaginaryMoves[iM]);
+				console.log(allLegalMoves, pos);
+				allLegalMoves.splice(pos-movesRemoved, 1);
+
 				movesRemoved += 1;
-			}*/
+				break;
+			}
 		}
 	}
 	return allLegalMoves;
@@ -171,18 +169,18 @@ function GetAllPseudoLegalMoves(gameState){
 	for (let i = 0; i < 64; i++) {
 		if(position[i] == 'x') continue;
 		if(!isPieceWhite(position[i]) && gameState.whiteMoves) continue;
-		let pieceMoves = GetPossiblePieceMoves(position, i, position[i]);
+		let pieceMoves = GetPossiblePieceMoves(position, i, position[i], gameState);
 		allPieceMoves = allPieceMoves.concat(pieceMoves);
 	}
 	return allPieceMoves;
 }
 
-export function GetPossiblePieceMoves(position, pieceIndex, piece){
+export function GetPossiblePieceMoves(position, pieceIndex, piece, gameState){
 	let pieceMoves = [];
 	let isWhite = (piece.toUpperCase() == piece); 
-	if(GameState.whiteMoves && !isWhite) return pieceMoves;
+	if(gameState.whiteMoves && !isWhite) return pieceMoves;
 	
-	if(!GameState.whiteMoves && isWhite) return pieceMoves;
+	if(!gameState.whiteMoves && isWhite) return pieceMoves;
 	if(piece == 'x') return pieceMoves;
 	switch(piece){
 		case 'x':
@@ -200,6 +198,7 @@ export function GetPossiblePieceMoves(position, pieceIndex, piece){
 					let isCapture = position[destinationIndex] != 'x';
 					if(isWhite == isDestWhite && isCapture) break;
 					pieceMoves.push({from: pieceIndex, to: destinationIndex, isCapture: isCapture});
+					if(isCapture) break;
 				}
 			}
 			return pieceMoves;
@@ -229,6 +228,7 @@ export function GetPossiblePieceMoves(position, pieceIndex, piece){
 					let isCapture = position[destinationIndex] != 'x';
 					if(isWhite == isDestWhite && isCapture) break;
 					pieceMoves.push({from: pieceIndex, to: destinationIndex, isCapture: isCapture});
+					if(isCapture) break;
 				}
 			}
 			return pieceMoves;
@@ -244,6 +244,7 @@ export function GetPossiblePieceMoves(position, pieceIndex, piece){
 					let isCapture = position[destinationIndex] != 'x';
 					if(isWhite == isDestWhite && isCapture) break;
 					pieceMoves.push({from: pieceIndex, to: destinationIndex, isCapture: isCapture});
+					if(isCapture) break;
 				}
 			}
 			return pieceMoves;
