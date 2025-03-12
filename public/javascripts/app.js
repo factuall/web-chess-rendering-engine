@@ -1,4 +1,4 @@
-import {DEBUG_SHOWPOS_ONHOVER, SquareSize, PieceSize, setCurrentPosition, GameState} from "./globals.js"
+import {DEBUG_SHOWPOS_ONHOVER, SquareSize, PieceSize, setCurrentPosition, GameState, getAppState} from "./globals.js"
 import {InterpretFen, PositionToFen, GetLegalMoves} from "./chess-utils.js"
 import { SetChessSounds, SetPieceImages, drawChessBoard } from "./board.js"
 
@@ -93,13 +93,53 @@ function incrementCounter() {
     }
 }
 
-var DisplayPosition = testPosition.slice();
-setCurrentPosition(testPosition.slice());
+var DisplayPosition = StartingPosition.slice();
+setCurrentPosition(StartingPosition.slice());
 
 function Start(){
 	SetPieceImages(PiecesImages);
 	SetChessSounds(ChessSounds);
 	drawChessBoard(DisplayPosition);
 	GameState.legalMoves = GetLegalMoves(GameState.position);
+}
+
+document.addEventListener('keydown', (event) => {
+	if(event.key == 'e') toggleEditMode();
+});
+
+let boardEditContainer = document.getElementById("board-edit-container");
+let editButtons = Array.from(boardEditContainer.children);
+let editColorToggle = document.getElementById("bedit-color-toggle")
+
+editColorToggle.addEventListener("click", (event)=>{
+	event.preventDefault();
+	let appState = getAppState();
+	appState.editWhiteMode = !appState.editWhiteMode;
+	editColorToggle.style.backgroundColor = appState.editWhiteMode ? "rgb(228, 228, 228)" : "rgb(36, 36, 36)";
+	editColorToggle.style.color = appState.editWhiteMode ? "rgb(36, 36, 36)" : "rgb(228, 228, 228)";
+	editColorToggle.innerHTML = appState.editWhiteMode ? "white" : "black";
+});
+
+/* 0 delete 1 move 2 king 3 queen 4 rook 5 bishop 6 knight 7 pawn */
+for (let bI = 0; bI < 8; bI++) {
+	editButtons[bI].addEventListener("click", (event)=>{
+		event.preventDefault();
+		for (let bII = 0; bII < 8; bII++) {
+			editButtons[bII].style.backgroundColor = "";
+		}
+		
+		editButtons[bI].style.backgroundColor = "rgb(36, 36, 36)";
+		getAppState().editIndex = bI;
+	})
+};
+
+function toggleEditMode(){
+	let appState = getAppState();
+	appState.editMode = !appState.editMode;
+	if(appState.editMode){
+		boardEditContainer.style.display = "flex";
+	}else{
+		boardEditContainer.style.display = "none";
+	}
 }
 

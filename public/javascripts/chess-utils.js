@@ -148,13 +148,11 @@ export function GetLegalMoves(gameState){
 		let imaginaryMoves = GetAllPseudoLegalMoves(imaginaryGameState);
 		for (let iM = 0; iM < imaginaryMoves.length; iM++) {
 			if(!imaginaryMoves[iM].isCapture) continue;
-
 			if((imaginaryMoves[iM].to == whiteKingPos && !imaginaryGameState.whiteMoves) ||
 			(imaginaryMoves[iM].to == blackKingPos && imaginaryGameState.whiteMoves)){
-				console.log(allPieceMoves[pos], imaginaryMoves[iM]);
-				console.log(allLegalMoves, pos);
-				allLegalMoves.splice(pos-movesRemoved, 1);
-
+				//console.log(allPieceMoves[pos], imaginaryMoves[iM]);
+				//console.log(allLegalMoves, pos);
+				//allLegalMoves.splice(pos-movesRemoved, 1);
 				movesRemoved += 1;
 				break;
 			}

@@ -1,10 +1,10 @@
-export const DEBUG_SHOW_NUMBERS = true;
+export const DEBUG_SHOW_NUMBERS = false;
 export const DEBUG_SHOWPOS_ONHOVER = false;
 export const APPLY_CHESS_RULES = true;
-export var ShowPositionSideCharacters = true;
-export var SquareSize = 100;
-export var PieceSize = 98;
-export var CurrentPosition = [];
+export let ShowPositionSideCharacters = true;
+export let SquareSize = 100;
+export let PieceSize = 98;
+export let CurrentPosition = [];
 
 export function setCurrentPosition(position){
     GameState.position = position;
@@ -12,6 +12,12 @@ export function setCurrentPosition(position){
 
 export function toggleSideCharacters(){
     ShowPositionSideCharacters = !ShowPositionSideCharacters;
+}
+
+export const AppState = {
+    editMode: false,
+    editIndex: -1,
+    editWhiteMode: true 
 }
 
 export const GameState = {
@@ -30,6 +36,10 @@ export function playerMoved(){
 
 export function getGameState(){
     return GameState;
+}
+
+export function getAppState(){
+    return AppState;
 }
 
 export function kingMoved(isWhite){

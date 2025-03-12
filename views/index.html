@@ -17,12 +17,24 @@
 	<p>Pola's chess rendering!</p>
 	<p>keyboard binds:</p>
 	<p>&nbsp;&nbsp;[f] flip board</p>
+	<p>&nbsp;&nbsp;[e] toggle edit mode</p>
 	<div class="container">
 		<canvas id="board-canvas" width="800" height="800"></canvas>
 	</div>
 	<div class="container">
 		<button onclick="ApplyFen()">Apply a position (FEN)</button>
 		<input id="fen-input" type="text" value="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1">
+	</div>
+	<div id="board-edit-container" class="container" style="display: none;">
+		<div id="bedit-delete" class="bedit-button">delete</div>
+		<div id="bedit-move" class="bedit-button">move</div>
+		<div id="bedit-king" class="bedit-button">king</div>
+		<div id="bedit-queen" class="bedit-button">queen</div>
+		<div id="bedit-rook" class="bedit-button">rook</div>
+		<div id="bedit-bishop" class="bedit-button">bishop</div>
+		<div id="bedit-knight" class="bedit-button">knight</div>
+		<div id="bedit-pawn" class="bedit-button">pawn</div>
+		<div id="bedit-color-toggle" class="bedit-button" style="background-color: rgb(228, 228, 228); color: rgb(36, 36, 36)">white</div>
 	</div>
 	<script type="module" src="javascripts/app.js"></script>
 </body>
