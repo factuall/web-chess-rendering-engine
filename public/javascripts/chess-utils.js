@@ -58,6 +58,7 @@ export function PositionToFen(position, GameState){
 		}
 		if(posY < 7) fen += '/';
 	}
+	//TODO: actually grab the GameState from the argument instead of getting it right here and update all of the functions in the rest of the code
 	let lGameState = getGameState(); 
 	let colorMoving = lGameState.whiteMoves ? 'w' : 'b';
 	fen += ` ${colorMoving} `;
@@ -69,6 +70,10 @@ export function PositionToFen(position, GameState){
 		if(lGameState.canBlackCastleK) fen += 'k';
 		if(lGameState.canBlackCastleQ) fen += 'q';
 		fen += ' ';
+	}
+	if(lGameState.enPassant > -1){
+		let coords = IndexToPosition(lGameState.enPassant);
+		fen += String.fromCharCode(97 + coords.x) + (8 - coords.y) + ' ';
 	}
 	return fen;
 }
@@ -269,11 +274,24 @@ export function GetPossiblePieceMoves(position, pieceIndex, piece, gameState){
 						if(isWhite != isDestWhite)
 							pieceMoves.push({from: pieceIndex, to: destinationIndex+1, isCapture: true});
 					}
+					if(gameState.enPassant > -1){
+						let enPassantOffset = isWhite ? -8 : 8;
+						if(gameState.enPassant == pieceIndex+1){
+							pieceMoves.push({from: pieceIndex, to: gameState.enPassant+enPassantOffset, isCapture: true, enPassant: true});
+						}
+						if(gameState.enPassant == pieceIndex-1){
+							pieceMoves.push({from: pieceIndex, to: gameState.enPassant+enPassantOffset, isCapture: true, enPassant: true});
+						}
+					}
 				}
 				if(dist >= range) break;
 				isDestWhite = position[destinationIndex].toUpperCase() == position[destinationIndex];
 				if(position[destinationIndex] != 'x') break;
-				pieceMoves.push({from: pieceIndex, to: destinationIndex, isCapture: false});
+				if(dist == 1)
+					pieceMoves.push({from: pieceIndex, to: destinationIndex, isCapture: false, doublePawnMove: true});
+				else
+					pieceMoves.push({from: pieceIndex, to: destinationIndex, isCapture: false, doublePawnMove: false});
+				
 			}
 			return pieceMoves;
 			break;

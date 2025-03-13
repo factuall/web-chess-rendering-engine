@@ -28,6 +28,7 @@ export const GameState = {
 	canBlackCastleQ: true,
 	canWhiteCastleK: true,
 	canBlackCastleK: true,
+    enPassant: -1
 };
 
 export function playerMoved(){

@@ -1,5 +1,5 @@
 import {DEBUG_SHOW_NUMBERS, DEBUG_SHOWPOS_ONHOVER, APPLY_CHESS_RULES, CurrentPosition, ShowPositionSideCharacters, GameState, playerMoved, kingMoved, rookMoved, getGameState, getAppState} from "./globals.js";
-import { PositionToFen, GetPossiblePieceMoves, IndexToPosition, GetLegalMoves } from "./chess-utils.js";
+import { PositionToFen, GetPossiblePieceMoves, IndexToPosition, GetLegalMoves, isPieceWhite } from "./chess-utils.js";
 
 let SquareSize = 100;
 let PieceSize = 98;
@@ -275,7 +275,7 @@ function updateMouse(){
                     gs.position[mIndex] = appState.editWhiteMode ? 'B' : 'b';
                     break;
                 case 6:
-                    gs.position[mIndex] = appState.editWhiteMode ? 'B' : 'b';
+                    gs.position[mIndex] = appState.editWhiteMode ? 'N' : 'n';
                     break;
                 case 7:
                     gs.position[mIndex] = appState.editWhiteMode ? 'P' : 'p';
@@ -387,10 +387,10 @@ function updateMouse(){
                     ChessSounds[0].play();
                 
                 //losing castle rights after moving a king
-                if(GameState.position[pieceHeldIndex] == 'K'){
+                if(gs.position[pieceHeldIndex] == 'K'){
                     kingMoved(true);
                 }
-                if(GameState.position[pieceHeldIndex] == 'k'){
+                if(gs.position[pieceHeldIndex] == 'k'){
                     kingMoved(false);
                 }
 
@@ -400,18 +400,34 @@ function updateMouse(){
                 if(selectedMove.from == 0) rookMoved(false, false)//a8
                 if(selectedMove.from == 7) rookMoved(false, true)//h8
 
+                //pawn double square move
+                if(selectedMove.doublePawnMove == true){
+                    gs.enPassant = selectedMove.to;
+                }else{
+                    gs.enPassant = -1;
+                }
 
-                GameState.position[mIndex] = GameState.position[pieceHeldIndex];
-                if(mIndex != pieceHeldIndex)GameState.position[pieceHeldIndex] = 'x';
-                GameState.legalMoves = GetLegalMoves(GameState.position);
+                //en passant
+                
+                if(selectedMove.enPassant == true){
+                    if(isPieceWhite(gs.position[pieceHeldIndex])){
+                        gs.position[selectedMove.to + 8] = 'x';
+                    }else{
+                        gs.position[selectedMove.to - 8] = 'x';
+                    }
+                }
+
+                gs.position[mIndex] = gs.position[pieceHeldIndex];
+                if(mIndex != pieceHeldIndex)gs.position[pieceHeldIndex] = 'x';
+                gs.legalMoves = GetLegalMoves(gs.position);
             }
-            DisplayPosition = GameState.position.slice();
+            DisplayPosition = gs.position.slice();
             pieceHeldIndex = -1;
             drawChessBoard(DisplayPosition);
 			UpdateFenBar();
 			
 		}else{
-			DrawPieceAbs(mouse.x - (PieceSize/2), mouse.y - (PieceSize/2), GameState.position[pieceHeldIndex]);
+			DrawPieceAbs(mouse.x - (PieceSize/2), mouse.y - (PieceSize/2), gs.position[pieceHeldIndex]);
 			rerender = true;
 		}
 	}
