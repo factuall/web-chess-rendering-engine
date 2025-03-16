@@ -1,5 +1,5 @@
 import {DEBUG_SHOWPOS_ONHOVER, SquareSize, PieceSize, setCurrentPosition, GameState, getAppState, setGameState} from "./globals.js"
-import {InterpretFen, PositionToFen, GetLegalMoves} from "./chess-utils.js"
+import {interpretFen, positionToFen, getLegalMoves} from "./chess-utils.js"
 import { SetChessSounds, SetPieceImages, drawChessBoard } from "./board.js"
 
 const CANVAS = document.getElementById("board-canvas");
@@ -14,16 +14,16 @@ const fontRobotoFile = new FontFace(
 document.fonts.add(fontRobotoFile);
 
 
-let StartingPosition = InterpretFen('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
-let TwokingsPosition = InterpretFen('3k4/8/8/8/8/4K3/8/8 w KQkq - 0 1');
-let SlidingPieces = InterpretFen('8/1QrBb3/8/8/8/4K3/8/8 w KQkq - 0 1');
+let StartingPosition = interpretFen('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+let TwokingsPosition = interpretFen('3k4/8/8/8/8/4K3/8/8 w KQkq - 0 1');
+let SlidingPieces = interpretFen('8/1QrBb3/8/8/8/4K3/8/8 w KQkq - 0 1');
 
 
 let PiecesImages = [];
 let ChessSounds = [];
 //https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces
 //kK/qQ/rR/nN/bB/pP//
-function LoadPieces(){
+function loadPieces(){
 	PiecesImages.push(new Image());
 	PiecesImages[0].src = "/images/Chess_kdt45.svg";
 	PiecesImages.push(new Image());
@@ -58,7 +58,7 @@ function LoadPieces(){
 
 //only soundset available: chesscom
 //move/capture/castle/game-start/game-end/
-function LoadSounds(soundSet){
+function loadSounds(soundSet){
 	ChessSounds.push(new Audio());
 	ChessSounds[0].src = `/sounds/${soundSet}/move.wav`;
 	ChessSounds.push(new Audio());
@@ -71,8 +71,8 @@ function LoadSounds(soundSet){
 	ChessSounds[3].src = `/sounds/${soundSet}/game-end.wav`;
 }
 
-LoadPieces();
-LoadSounds("chesscom");
+loadPieces();
+loadSounds("chesscom");
 let allAssets = PiecesImages.concat(ChessSounds);
 var len = PiecesImages.length,
     counter = 0;
@@ -87,7 +87,7 @@ var len = PiecesImages.length,
 function incrementCounter() {
     counter++;
     if ( counter === len ) {
-        Start();
+        start();
     }
 }
 
@@ -95,15 +95,15 @@ function incrementCounter() {
 var DisplayPosition = StartingPosition.position.slice();
 setCurrentPosition(StartingPosition.position.slice());
 
-function Start(){
+function start(){
 	SetPieceImages(PiecesImages);
 	SetChessSounds(ChessSounds);
 	drawChessBoard(DisplayPosition);
-	GameState.legalMoves = GetLegalMoves(GameState.position);
+	GameState.legalMoves = getLegalMoves(GameState.position);
 }
 
 document.addEventListener('keydown', (event) => {
-	if(event.key == 'e') toggleEditMode();
+	if(event.key === 'e') toggleEditMode();
 });
 
 let boardEditContainer = document.getElementById("board-edit-container");
@@ -145,7 +145,7 @@ function toggleEditMode(){
 let applyFenButton = document.getElementById("apply-fen-button");
 let fenInput = document.getElementById("fen-input");
 applyFenButton.addEventListener('click', (event) => {
-	setGameState(InterpretFen(fenInput.value));
-	GameState.legalMoves = GetLegalMoves(GameState);
+	setGameState(interpretFen(fenInput.value));
+	GameState.legalMoves = getLegalMoves(GameState);
 	drawChessBoard(GameState.position);
 });

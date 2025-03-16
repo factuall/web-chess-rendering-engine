@@ -1,5 +1,5 @@
 import {CurrentPosition, setCurrentPosition, toggleSideCharacters} from "./globals.js"
-import { InterpretFen, PositionToFen, IndexToCoords, IndexToPosition } from "./chess-utils.js"
+import { interpretFen, positionToFen, indexToCoords, indexToPosition } from "./chess-utils.js"
 import { SetPieceImages, drawChessBoard } from "./board.js"
 
 //PUBLIC FLAGS
@@ -17,7 +17,7 @@ const fontRobotoFile = new FontFace(
 document.fonts.add(fontRobotoFile);
 
 
-let StartingPosition = InterpretFen('8/8/8/8/8/8/8/8 w KQkq - 0 1');
+let StartingPosition = interpretFen('8/8/8/8/8/8/8/8 w KQkq - 0 1');
 
 let PiecesImages = [];
 //https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces
@@ -87,7 +87,7 @@ let correctGuess;
 let correctIndex;
 function randomPosition(){
     correctIndex = Math.floor(Math.random() * 64);
-    correctGuess = IndexToPosition(correctIndex);
+    correctGuess = indexToPosition(correctIndex);
 
     console.log(correctGuess);
 

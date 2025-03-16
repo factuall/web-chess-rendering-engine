@@ -1,5 +1,5 @@
 import {DEBUG_SHOW_NUMBERS, DEBUG_SHOWPOS_ONHOVER, APPLY_CHESS_RULES, CurrentPosition, ShowPositionSideCharacters, GameState, playerMoved, kingMoved, rookMoved, getGameState, getAppState} from "./globals.js";
-import { PositionToFen, GetPossiblePieceMoves, IndexToCoords, GetLegalMoves, isPieceWhite } from "./chess-utils.js";
+import { positionToFen, getPossiblePieceMoves, indexToCoords, getLegalMoves, isPieceWhite } from "./chess-utils.js";
 
 let SquareSize = 100;
 let PieceSize = 98;
@@ -121,7 +121,7 @@ function drawBoard(flipped){
                 SquareSize,
                 SquareSize,
                 posY % 2 != 0 ? 
-                (squareIndex % 2 == 0 ? ColorSquareBlack : ColorSquareWhite) : (squareIndex % 2 == 0 ? ColorSquareWhite : ColorSquareBlack)
+                (squareIndex % 2 === 0 ? ColorSquareBlack : ColorSquareWhite) : (squareIndex % 2 === 0 ? ColorSquareWhite : ColorSquareBlack)
             );
 
             if(DEBUG_SHOW_NUMBERS)
@@ -133,25 +133,25 @@ function drawBoard(flipped){
                 boardFlipped ? 63 - squareIndex : squareIndex 
             );
 
-            let isDebugSquare = (DEBUG_SHOWPOS_ONHOVER && posX == mouseSq.x && posY == mouseSq.y);
-            if((posY == 7 && ShowPositionSideCharacters) || isDebugSquare){ //draw letters at the bottom of the board
+            let isDebugSquare = (DEBUG_SHOWPOS_ONHOVER && posX === mouseSq.x && posY === mouseSq.y);
+            if((posY === 7 && ShowPositionSideCharacters) || isDebugSquare){ //draw letters at the bottom of the board
                 DrawText(
                     (posX * SquareSize) + 84, 
                     (posY * SquareSize) + SquareSize - 4,
                     '25px',
                     posY % 2 != 0 ? 
-                    (squareIndex % 2 == 0 ? ColorSquareWhite : ColorSquareBlack) : (squareIndex % 2 == 0 ? ColorSquareBlack : ColorSquareWhite),
+                    (squareIndex % 2 === 0 ? ColorSquareWhite : ColorSquareBlack) : (squareIndex % 2 === 0 ? ColorSquareBlack : ColorSquareWhite),
                     flipped ? String.fromCharCode(104 - posX) : String.fromCharCode(97 + posX)
                 );
             }
             
-            if((posX == 0 && ShowPositionSideCharacters) || isDebugSquare){ //draw numbers on the left side of the board
+            if((posX === 0 && ShowPositionSideCharacters) || isDebugSquare){ //draw numbers on the left side of the board
                 DrawText(
                     (posX * SquareSize) + 2, 
                     (posY * SquareSize) + 22,
                     '25px',
                     posY % 2 != 0 ? 
-                    (squareIndex % 2 == 0 ? ColorSquareWhite : ColorSquareBlack) : (squareIndex % 2 == 0 ? ColorSquareBlack : ColorSquareWhite),
+                    (squareIndex % 2 === 0 ? ColorSquareWhite : ColorSquareBlack) : (squareIndex % 2 === 0 ? ColorSquareBlack : ColorSquareWhite),
                     flipped ? 1 + posY : 8 - posY
                 );
             }
@@ -184,7 +184,7 @@ function drawDestinations(moves, flipped){
     for (let i = 0; i < moves.length; i++) {
         let to = moves[i].to;
         if(flipped) to = 63-to;
-        let pos = IndexToCoords(to);
+        let pos = indexToCoords(to);
         drawCircle(pos.x * SquareSize + (SquareSize / 2), pos.y * SquareSize + (SquareSize / 2), SquareSize/4, ColorDestination, ColorDestination, 4);
     }
 }
@@ -218,7 +218,7 @@ function updateMousePosition(event){
     // If pageX/Y aren't available and clientX/Y are,
     // calculate pageX/Y - logic taken from jQuery.
     // (This is to support old IE)
-    if (event.pageX == null && event.clientX != null) {
+    if (event.pageX === null && event.clientX != null) {
         eventDoc = (event.target && event.target.ownerDocument) || document;
         doc = eventDoc.documentElement;
         body = eventDoc.body;
@@ -281,20 +281,20 @@ function updateMouse(){
                     break;
             }
             DisplayPosition = gs.position.slice();
-            gs.legalMoves = GetLegalMoves(gs.position);
+            gs.legalMoves = getLegalMoves(gs.position);
             drawChessBoard(DisplayPosition);
-            UpdateFenBar();
+            updateFenBar();
         }
 
-        if(appState.editIndex == 1){
-            if(pieceHeldIndex == -1){ //no piece held
+        if(appState.editIndex === 1){
+            if(pieceHeldIndex === -1){ //no piece held
                 if(mouseOneDown){
                     if(GameState.position[mIndex] != 'x' && !ignoreMOne){
                         DisplayPosition[mIndex] = 'x';
                         pieceHeldIndex = mIndex;
                         pieceHeldMoves = [];
                         for (let move = 0; move < GameState.legalMoves.length; move++) {
-                            if(GameState.legalMoves[move].from == pieceHeldIndex)
+                            if(GameState.legalMoves[move].from === pieceHeldIndex)
                                 pieceHeldMoves.push(GameState.legalMoves[move]);
                         }
                         drawChessBoard(DisplayPosition);
@@ -315,8 +315,8 @@ function updateMouse(){
                     let isCapture = false;
                     let selectedMove;
                     for (let i = 0; i < gs.legalMoves.length; i++) {
-                        if( gs.legalMoves[i].from == pieceHeldIndex &&
-                            gs.legalMoves[i].to == mIndex){
+                        if( gs.legalMoves[i].from === pieceHeldIndex &&
+                            gs.legalMoves[i].to === mIndex){
                             isLegalMove = true;
                             selectedMove = gs.legalMoves[i];
                             if(gs.legalMoves[i].isCapture) isCapture = true;
@@ -326,12 +326,12 @@ function updateMouse(){
     
                     GameState.position[mIndex] = GameState.position[pieceHeldIndex];
                     if(mIndex != pieceHeldIndex)GameState.position[pieceHeldIndex] = 'x';
-                    GameState.legalMoves = GetLegalMoves(GameState.position);
+                    GameState.legalMoves = getLegalMoves(GameState.position);
                     
                     DisplayPosition = GameState.position.slice();
                     pieceHeldIndex = -1;
                     drawChessBoard(DisplayPosition);
-                    UpdateFenBar();
+                    updateFenBar();
                     
                 }else{
                     DrawPieceAbs(mouse.x - (PieceSize/2), mouse.y - (PieceSize/2), GameState.position[pieceHeldIndex]);
@@ -342,14 +342,14 @@ function updateMouse(){
 
         return;
     }
-	if(pieceHeldIndex == -1){ //no piece held
+	if(pieceHeldIndex === -1){ //no piece held
 		if(mouseOneDown){
 			if(GameState.position[mIndex] != 'x' && !ignoreMOne){
 				DisplayPosition[mIndex] = 'x';
 				pieceHeldIndex = mIndex;
                 pieceHeldMoves = [];
                 for (let move = 0; move < GameState.legalMoves.length; move++) {
-                    if(GameState.legalMoves[move].from == pieceHeldIndex)
+                    if(GameState.legalMoves[move].from === pieceHeldIndex)
                         pieceHeldMoves.push(GameState.legalMoves[move]);
                 }
 				drawChessBoard(DisplayPosition);
@@ -370,8 +370,8 @@ function updateMouse(){
             let isCapture = false;
             let selectedMove;
             for (let i = 0; i < gs.legalMoves.length; i++) {
-                if( gs.legalMoves[i].from == pieceHeldIndex &&
-                    gs.legalMoves[i].to == mIndex){
+                if( gs.legalMoves[i].from === pieceHeldIndex &&
+                    gs.legalMoves[i].to === mIndex){
                     isLegalMove = true;
                     selectedMove = gs.legalMoves[i];
                     if(gs.legalMoves[i].isCapture) isCapture = true;
@@ -386,21 +386,21 @@ function updateMouse(){
                     ChessSounds[0].play();
                 
                 //losing castle rights after moving a king
-                if(gs.position[pieceHeldIndex] == 'K'){
+                if(gs.position[pieceHeldIndex] === 'K'){
                     kingMoved(true);
                 }
-                if(gs.position[pieceHeldIndex] == 'k'){
+                if(gs.position[pieceHeldIndex] === 'k'){
                     kingMoved(false);
                 }
 
                 //rook moved
-                if(selectedMove.from == 56) rookMoved(true, false)//a1
-                if(selectedMove.from == 63) rookMoved(true, true)//h1
-                if(selectedMove.from == 0) rookMoved(false, false)//a8
-                if(selectedMove.from == 7) rookMoved(false, true)//h8
+                if(selectedMove.from === 56) rookMoved(true, false)//a1
+                if(selectedMove.from === 63) rookMoved(true, true)//h1
+                if(selectedMove.from === 0) rookMoved(false, false)//a8
+                if(selectedMove.from === 7) rookMoved(false, true)//h8
 
                 //pawn double square move
-                if(selectedMove.doublePawnMove == true){
+                if(selectedMove.doublePawnMove === true){
                     gs.enPassant = selectedMove.to;
                 }else{
                     gs.enPassant = -1;
@@ -429,7 +429,7 @@ function updateMouse(){
                 }
 
                 //en passant
-                if(selectedMove.enPassant == true){
+                if(selectedMove.enPassant === true){
                     if(isPieceWhite(gs.position[pieceHeldIndex])){
                         gs.position[selectedMove.to + 8] = 'x';
                     }else{
@@ -439,12 +439,12 @@ function updateMouse(){
 
                 gs.position[mIndex] = gs.position[pieceHeldIndex];
                 if(mIndex != pieceHeldIndex)gs.position[pieceHeldIndex] = 'x';
-                gs.legalMoves = GetLegalMoves(gs.position);
+                gs.legalMoves = getLegalMoves(gs.position);
             }
             DisplayPosition = gs.position.slice();
             pieceHeldIndex = -1;
             drawChessBoard(DisplayPosition);
-			UpdateFenBar();
+			updateFenBar();
 			
 		}else{
 			DrawPieceAbs(mouse.x - (PieceSize/2), mouse.y - (PieceSize/2), gs.position[pieceHeldIndex]);
@@ -471,19 +471,19 @@ CANVAS.addEventListener('mouseup', function(event){
 });
 
 let FenInput = document.getElementById("fen-input");
-function ApplyFen(){
+function applyFen(){
 	setCurrentPosition(InterpretFen(FenInput.value));
 	DisplayPosition = GameState.position.slice();
 	drawChessBoard(DisplayPosition);
 }
 
-function UpdateFenBar(){
+function updateFenBar(){
     if(FenInput != null)
-	FenInput.value = PositionToFen(getGameState().position);
+	FenInput.value = positionToFen(getGameState().position);
 }
 
 document.addEventListener('keydown', (event) => {
-    if(event.key == 'f') boardFlipped = !boardFlipped;
+    if(event.key === 'f') boardFlipped = !boardFlipped;
     drawChessBoard(DisplayPosition);
-    if(event.key == 'x') GetPossiblePieceMoves(GameState.position, 9);
+    if(event.key === 'x') getPossiblePieceMoves(GameState.position, 9);
 });
