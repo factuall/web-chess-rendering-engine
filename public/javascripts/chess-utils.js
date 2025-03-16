@@ -1,7 +1,7 @@
 import { GameState, getGameState } from "./globals.js"
 
 export function InterpretFen(fen){
-	let positions = [];
+	let pieces = [];
 	let ntFragments = fen.split(" ");
 	let rows = ntFragments[0].split("/");
 
@@ -9,17 +9,43 @@ export function InterpretFen(fen){
 		let tokens = rows[row].split("");
 		for (let token = 0; token < tokens.length; token++) {
 
-			var tokenNum = parseInt(tokens[token]);
+			let tokenNum = parseInt(tokens[token]);
 			if(!isNaN(tokenNum) && tokens[token] === '' + tokenNum){ //number token
 				for (let i = 0; i < tokens[token]; i++) {
-					positions.push('x');	
+					pieces.push('x');	
 				}
 			}else{ //letter token
-					positions.push(tokens[token]);
+					pieces.push(tokens[token]);
 			}
 		}
 	}
-	return positions;
+
+	let gameState = {
+		position: pieces,
+		legalMoves: [],
+		whiteMoves: ntFragments[1] == 'w' ? true : false,
+		canWhiteCastleQ: false,
+		canBlackCastleQ: false,
+		canWhiteCastleK: false,
+		canBlackCastleK: false,
+		enPassant: -1
+	};
+
+	let castleRights = ntFragments[2].split("");
+	for (let i = 0; i < castleRights.length; i++) {
+		if(castleRights[i] == 'K') gameState.canWhiteCastleK = true; 
+		if(castleRights[i] == 'Q') gameState.canWhiteCastleQ = true;
+		if(castleRights[i] == 'k') gameState.canBlackCastleK = true; 
+		if(castleRights[i] == 'q') gameState.canBlackCastleQ = true;
+	}
+
+	let enPassantFragments = ntFragments[3].split("");
+	if(enPassantFragments[0] !== '-'){
+		let enPassantIndex = (enPassantFragments[0].charCodeAt(0) - 'a'.charCodeAt('a')) * 8
+		enPassantIndex += parseInt(enPassantFragments[1]);
+		gameState.enPassant = enPassantIndex;
+	}
+	return gameState;
 }
 
 export function IndexToCoords(index){
@@ -79,6 +105,8 @@ export function PositionToFen(position, GameState){
 	if(lGameState.enPassant > -1){
 		let coords = IndexToCoords(lGameState.enPassant);
 		fen += String.fromCharCode(97 + coords.x) + (8 - coords.y) + ' ';
+	}else{
+		fen += '-';
 	}
 	return fen;
 }
@@ -228,7 +256,6 @@ export function GetPossiblePieceMoves(position, pieceIndex, piece, gameState){
 			)
 				pieceMoves.push({from: pieceIndex, to: 62, isCapture: false, isCastleK: true})
 			
-				console.log(position);
 			if( gameState.canWhiteCastleQ && isWhite && //castling as white queen side
 				!isSquareAttacked(position, pieceIndex, false) &&  
 				gameState.position[57] == 'x' && !isSquareAttacked(position, 57, false) &&

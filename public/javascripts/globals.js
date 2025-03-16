@@ -1,4 +1,4 @@
-export const DEBUG_SHOW_NUMBERS = true;
+export const DEBUG_SHOW_NUMBERS = false;
 export const DEBUG_SHOWPOS_ONHOVER = false;
 export const APPLY_CHESS_RULES = true;
 export let ShowPositionSideCharacters = true;
@@ -20,7 +20,7 @@ export const AppState = {
     editWhiteMode: true 
 }
 
-export const GameState = {
+export let GameState = {
     position: [],
     legalMoves: [],
 	whiteMoves: true,
@@ -37,6 +37,11 @@ export function playerMoved(){
 
 export function getGameState(){
     return GameState;
+}
+
+export function setGameState(newGameState){
+    GameState = newGameState;
+
 }
 
 export function getAppState(){
