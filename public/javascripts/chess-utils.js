@@ -22,10 +22,15 @@ export function InterpretFen(fen){
 	return positions;
 }
 
-export function IndexToPosition(index){
+export function IndexToCoords(index){
 	let x = index - (Math.floor(index / 8) * 8);
 	let y = Math.floor(index / 8);
 	return {x, y};
+}
+
+export function IndexToPosition(index){
+	let coords = IndexToCoords(index);
+	return String.fromCharCode('a'.charCodeAt(0) + coords.x) + (8 - coords.y);
 }
 
 export function PositionToFen(position, GameState){
@@ -72,7 +77,7 @@ export function PositionToFen(position, GameState){
 		fen += ' ';
 	}
 	if(lGameState.enPassant > -1){
-		let coords = IndexToPosition(lGameState.enPassant);
+		let coords = IndexToCoords(lGameState.enPassant);
 		fen += String.fromCharCode(97 + coords.x) + (8 - coords.y) + ' ';
 	}
 	return fen;
@@ -139,13 +144,11 @@ export function GetLegalMoves(gameState){
 
 	let allPieceMoves = GetAllPseudoLegalMoves(gameState);
 	let allLegalMoves = allPieceMoves.slice();
-	console.log(allLegalMoves);
 	let allNewPositions = getAllPossiblePositions(gameState.position, allPieceMoves);
 	let imaginaryGameState;
 	let movesRemoved = 0;
 	for (let pos = 0; pos < allNewPositions.length; pos++) {
 		//TODO: take account of the fact that the castle abilities might change in some of these positions
-		
 		imaginaryGameState = structuredClone(gameState);
 		imaginaryGameState.whiteMoves = !gameState.whiteMoves;
 		imaginaryGameState.position = allNewPositions[pos];
@@ -218,6 +221,39 @@ export function GetPossiblePieceMoves(position, pieceIndex, piece, gameState){
 				if(isWhite == isDestWhite && isCapture) break;
 				pieceMoves.push({from: pieceIndex, to: destinationIndex, isCapture: isCapture});
 			}
+			if( gameState.canWhiteCastleK && isWhite && //castling as white king side
+				!isSquareAttacked(position, pieceIndex, false) && 
+				gameState.position[61] == 'x' && !isSquareAttacked(position, 61, false) &&
+				gameState.position[62] == 'x' && !isSquareAttacked(position, 62, false)
+			)
+				pieceMoves.push({from: pieceIndex, to: 62, isCapture: false, isCastleK: true})
+			
+				console.log(position);
+			if( gameState.canWhiteCastleQ && isWhite && //castling as white queen side
+				!isSquareAttacked(position, pieceIndex, false) &&  
+				gameState.position[57] == 'x' && !isSquareAttacked(position, 57, false) &&
+				gameState.position[58] == 'x' && !isSquareAttacked(position, 58, false) &&
+				gameState.position[59] == 'x' && !isSquareAttacked(position, 59, false) 
+			)
+				pieceMoves.push({from: pieceIndex, to: 58, isCapture: false, isCastleQ: true})
+		
+			if( gameState.canBlackCastleK && !isWhite && //castling as white king side
+				!isSquareAttacked(position, pieceIndex, false) && 
+				gameState.position[6] == 'x' && !isSquareAttacked(position, 6, true) &&
+				gameState.position[5] == 'x' && !isSquareAttacked(position, 5, true)
+			)
+				pieceMoves.push({from: pieceIndex, to: 6, isCapture: false, isCastleK: true})
+			
+			if( gameState.canBlackCastleQ && !isWhite && //castling as white queen side
+				!isSquareAttacked(position, pieceIndex, false) &&  
+				gameState.position[3] == 'x' && !isSquareAttacked(position, 3, true) &&
+				gameState.position[2] == 'x' && !isSquareAttacked(position, 2, true) &&
+				gameState.position[1] == 'x' && !isSquareAttacked(position, 1, true) 
+			)
+				pieceMoves.push({from: pieceIndex, to: 2, isCapture: false, isCastleQ: true})
+
+
+			
 			return pieceMoves;
 			break;
 		case 'r':
@@ -255,8 +291,8 @@ export function GetPossiblePieceMoves(position, pieceIndex, piece, gameState){
 		case 'p':
 		case "P": //TODO: prevent from capturing a piece on the other side of the board caused by the board-table wrapping
 			let range = 1;
-			if ((isWhite && IndexToPosition(pieceIndex).y == 6) || 
-				(!isWhite && IndexToPosition(pieceIndex).y == 1))
+			if ((isWhite && IndexToCoords(pieceIndex).y == 6) || 
+				(!isWhite && IndexToCoords(pieceIndex).y == 1))
 			range = 2;
 			let dir = isWhite ? 0 : 1;
 			let destinationIndex = pieceIndex;
@@ -460,8 +496,6 @@ export function isPieceWhite(piece){
 	return piece.toUpperCase() == piece;
 }
 
-console.log(SqEdgeDistances);
-
 function getAllPossiblePositions(position, moves){
 	let possiblePositions = [];
 	for (let i = 0; i < moves.length; i++) {
@@ -471,4 +505,17 @@ function getAllPossiblePositions(position, moves){
 		possiblePositions.push(newPosition);
 	}
 	return possiblePositions;
+}
+
+function isSquareAttacked(position, checkedSquare, isAttackerWhite){
+	let attacked = false;
+	let imaginaryGameState = {position: position, whiteMoves: isAttackerWhite};
+	let imaginaryMoves = GetAllPseudoLegalMoves(imaginaryGameState);
+	for (let iM = 0; iM < imaginaryMoves.length; iM++) {
+		if(imaginaryMoves[iM].to == checkedSquare){
+			attacked = true;
+			break;
+		}
+	}
+	return attacked;
 }

@@ -1,5 +1,5 @@
 import {CurrentPosition, setCurrentPosition, toggleSideCharacters} from "./globals.js"
-import { InterpretFen, PositionToFen, SquareIndexToPosition } from "./chess-utils.js"
+import { InterpretFen, PositionToFen, IndexToCoords, IndexToPosition } from "./chess-utils.js"
 import { SetPieceImages, drawChessBoard } from "./board.js"
 
 //PUBLIC FLAGS
@@ -87,7 +87,8 @@ let correctGuess;
 let correctIndex;
 function randomPosition(){
     correctIndex = Math.floor(Math.random() * 64);
-    correctGuess = SquareIndexToPosition(correctIndex);
+    correctGuess = IndexToPosition(correctIndex);
+
     console.log(correctGuess);
 
     switch(difficulty){

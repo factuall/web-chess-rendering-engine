@@ -1,5 +1,5 @@
 import {DEBUG_SHOW_NUMBERS, DEBUG_SHOWPOS_ONHOVER, APPLY_CHESS_RULES, CurrentPosition, ShowPositionSideCharacters, GameState, playerMoved, kingMoved, rookMoved, getGameState, getAppState} from "./globals.js";
-import { PositionToFen, GetPossiblePieceMoves, IndexToPosition, GetLegalMoves, isPieceWhite } from "./chess-utils.js";
+import { PositionToFen, GetPossiblePieceMoves, IndexToCoords, GetLegalMoves, isPieceWhite } from "./chess-utils.js";
 
 let SquareSize = 100;
 let PieceSize = 98;
@@ -130,7 +130,7 @@ function drawBoard(flipped){
                 (posY * SquareSize) + SquareSize - 2,
                 'large',
                 'black',
-                squareIndex
+                boardFlipped ? 63 - squareIndex : squareIndex 
             );
 
             let isDebugSquare = (DEBUG_SHOWPOS_ONHOVER && posX == mouseSq.x && posY == mouseSq.y);
@@ -184,7 +184,7 @@ function drawDestinations(moves, flipped){
     for (let i = 0; i < moves.length; i++) {
         let to = moves[i].to;
         if(flipped) to = 63-to;
-        let pos = IndexToPosition(to);
+        let pos = IndexToCoords(to);
         drawCircle(pos.x * SquareSize + (SquareSize / 2), pos.y * SquareSize + (SquareSize / 2), SquareSize/4, ColorDestination, ColorDestination, 4);
     }
 }
@@ -257,7 +257,6 @@ function updateMouse(){
     let appState = getAppState();
     if(appState.editMode){
         if(mouseOneDown){
-            console.log(appState.editWhiteMode);
             switch(appState.editIndex){
                 case 0:
                     gs.position[mIndex] = 'x';
@@ -407,8 +406,29 @@ function updateMouse(){
                     gs.enPassant = -1;
                 }
 
+                if(isPieceWhite(gs.position[selectedMove.from])){
+                    if(selectedMove.isCastleK){
+                        gs.position[63] = 'x';
+                        gs.position[61] = 'R';
+                    }
+    
+                    if(selectedMove.isCastleQ){
+                        gs.position[56] = 'x';
+                        gs.position[59] = 'R';
+                    }
+                }else{
+                    if(selectedMove.isCastleK){
+                        gs.position[7] = 'x';
+                        gs.position[5] = 'r';
+                    }
+    
+                    if(selectedMove.isCastleQ){
+                        gs.position[0] = 'x';
+                        gs.position[3] = 'r';
+                    }
+                }
+
                 //en passant
-                
                 if(selectedMove.enPassant == true){
                     if(isPieceWhite(gs.position[pieceHeldIndex])){
                         gs.position[selectedMove.to + 8] = 'x';
