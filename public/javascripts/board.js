@@ -6,6 +6,7 @@ let PieceSize = 98;
 let ColorSquareWhite = '#f0d9b5';
 let ColorSquareBlack = '#b58863';
 let ColorDestination = "rgba(0, 0, 0, 0.49)"
+let ColorArrow = "rgba(81, 221, 90, 0.7)";
 let PiecesImages = [];
 let ChessSounds = [];
 let DisplayPosition = [];
@@ -54,6 +55,61 @@ function drawCircle(x, y, r, fillColor, strokeColor, strokeWidth){
     CTX.stroke();
 }
 
+export function drawLineAbs(xFrom, yFrom, xTo, yTo, lineWidth, color){
+    CTX.lineWidth = lineWidth;
+    CTX.strokeStyle = color;
+    CTX.beginPath();
+    CTX.moveTo(xFrom, yFrom);
+    CTX.lineTo(xTo, yTo);
+    CTX.stroke();
+}
+
+//stolen from StackOverflow with slight modifications to match my case
+function drawArrow(fromx, fromy, tox, toy){
+    //letiables to be used when creating the arrow
+    let width = SquareSize / 7;
+    let headlen = SquareSize/8;
+    let angle = Math.atan2(toy-fromy,tox-fromx);
+    // This makes it so the end of the arrow head is located at tox, toy, don't ask where 1.15 comes from
+    tox -= Math.cos(angle) * ((width*1.15));
+    toy -= Math.sin(angle) * ((width*1.15));
+
+    
+    //starting path of the arrow from the start square to the end square and drawing the stroke
+    
+    let triSidePointOne = {x: tox-headlen*Math.cos(angle-Math.PI/7), y: toy-headlen*Math.sin(angle-Math.PI/7)};
+    let triSidePointTwo = {x: tox-headlen*Math.cos(angle+Math.PI/7), y: toy-headlen*Math.sin(angle+Math.PI/7)};
+    let middlePoint = {x: (triSidePointOne.x + triSidePointTwo.x) / 2, y: (triSidePointOne.y + triSidePointTwo.y) / 2};
+
+    CTX.beginPath();
+    CTX.moveTo(fromx, fromy);
+    CTX.lineTo(middlePoint.x, middlePoint.y);
+    CTX.strokeStyle = ColorArrow;
+    CTX.lineWidth = width;
+    CTX.stroke();
+    
+    //starting a new path from the head of the arrow to one of the sides of the point
+    CTX.beginPath();
+    CTX.moveTo(tox, toy);
+    CTX.lineTo(tox-headlen*Math.cos(angle-Math.PI/7),toy-headlen*Math.sin(angle-Math.PI/7));
+    
+    //path from the side point of the arrow, to the other side point
+    CTX.lineTo(tox-headlen*Math.cos(angle+Math.PI/7),toy-headlen*Math.sin(angle+Math.PI/7));
+    
+    //path from the side point back to the tip of the arrow, and then again to the opposite side point
+    CTX.lineTo(tox, toy);
+    CTX.lineTo(tox-headlen*Math.cos(angle-Math.PI/7),toy-headlen*Math.sin(angle-Math.PI/7));
+
+    //draws the paths created above
+    CTX.strokeStyle = ColorArrow;
+    CTX.lineWidth = width;
+    CTX.stroke();
+    CTX.fillStyle = ColorArrow;
+    CTX.fill();
+
+    CTX.lineWidth = 1; //reset the line width
+}
+
 export function DrawPiece(sqX, sqY, piece){
     DrawPieceAbs(sqX * SquareSize, sqY*SquareSize, piece);
 }
@@ -100,6 +156,22 @@ export function DrawPieceAbs(x, y, piece){
     }
 }
 
+//{x, y}, {x, y}
+function drawPingArrow(from, to){
+    let sizeX = Math.abs(from.x - to.x);
+    let sizeY = Math.abs(from.y - to.y);
+    let absFrom = {
+        x: (from.x * SquareSize) + SquareSize/2,
+        y: (from.y * SquareSize) + SquareSize/2};
+    let absTo = {
+        x: (to.x * SquareSize) + SquareSize/2, 
+        y: (to.y * SquareSize) + SquareSize/2};
+    drawArrow(absFrom.x, absFrom.y, absTo.x, absTo.y);
+    //drawLineAbs(absFrom.x, absFrom.y, absTo.x, absTo.y, thickness, ColorArrow);
+    if(!(sizeX == 3 && sizeY == 2) || (sizeX == 2 && sizeY == 3)){ //knight arrow
+    }
+}
+
 export function drawChessBoard(position){
     DisplayPosition = position.slice();
     drawBoard(boardFlipped);
@@ -108,8 +180,15 @@ export function drawChessBoard(position){
         drawDestinations(pieceHeldMoves, boardFlipped);
 
     }
-    
+    arrowsToDraw.forEach((arrow) => {
+        drawPingArrow(arrow[0], arrow[1]);
+    });
+    if(arrowFrom.x != -1 && (arrowFrom.x != arrowTo.x || arrowFrom.y != arrowTo.y )){
+        drawPingArrow(arrowFrom, arrowTo);
+    }
+    //drawPingArrow({x: 1, y: 0}, {x: 0, y: 0});
 }
+
 
 function drawBoard(flipped){
     let squareIndex = 0;
@@ -206,11 +285,6 @@ let pieceHeldMoves = [];
 let rerender = false; //set true if next mouse update needs board rerendered 
 let ignoreMOne = false; //used to prevent user from pressing m1 on empty square, moving to another square and then getting a piece grabbed 
 function updateMousePosition(event){
-	if(rerender = true){
-		drawChessBoard(DisplayPosition);
-		rerender = false;
-	}
-	
     let dot, eventDoc, doc, body, pageX, pageY;
 	let rect = CANVAS.getBoundingClientRect();
     event = event || window.event; // IE-ism
@@ -240,7 +314,20 @@ function updateMousePosition(event){
     updateMouse();
 }
 
+let arrowFrom = {x: -1, y: -1};
+let arrowTo = {x: -1, y: -1};
+let arrowsToDraw = [];
 function updateMouse(){
+    if(mouseOneDown && arrowsToDraw.length > 0){
+        arrowsToDraw = [];
+        rerender = true;
+    } 
+
+	if(rerender = true){
+		drawChessBoard(DisplayPosition);
+		rerender = false;
+	}
+
 	let mSqX = Math.floor(mouse.x / SquareSize);
 	let mSqY = Math.floor(mouse.y / SquareSize);
 
@@ -451,6 +538,25 @@ function updateMouse(){
 			rerender = true;
 		}
 	}
+
+    //pinging - adding arrows to the list
+    if(mouseTwoDown){
+        if(arrowFrom.x == -1){
+            arrowFrom.x = mSqX;
+            arrowFrom.y = mSqY;
+        }
+        arrowTo.x = mSqX;
+        arrowTo.y = mSqY;
+    }
+    if(!mouseTwoDown && arrowFrom.x != -1){
+        arrowTo.x = mSqX;
+        arrowTo.y = mSqY;
+        arrowsToDraw.push([
+            {x: arrowFrom.x, y: arrowFrom.y},
+            {x: arrowTo.x, y: arrowTo.y}
+        ]);
+        arrowFrom.x = -1;
+    }
 }
 
 CANVAS.addEventListener('mousedown', function(event){
