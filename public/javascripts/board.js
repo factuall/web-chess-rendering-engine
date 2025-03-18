@@ -373,6 +373,14 @@ function updateMouse(){
             updateFenBar();
         }
 
+        if(mouseTwoDown){
+            gs.position[mIndex] = 'x';
+            DisplayPosition = gs.position.slice();
+            gs.legalMoves = getLegalMoves(gs.position);
+            drawChessBoard(DisplayPosition);
+            updateFenBar();
+        }
+
         if(appState.editIndex === 1){
             if(pieceHeldIndex === -1){ //no piece held
                 if(mouseOneDown){

@@ -83,6 +83,15 @@ button{
   background-color: rgb(70, 70, 70);
 }
 
+.bedit-icon{
+  width: 80px;
+  height: 80px;
+}
+
+.filter-invert{
+  filter: invert();
+}
+
 .bedit-button:active{
   background-color: rgb(53, 53, 53);
 }

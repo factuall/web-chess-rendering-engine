@@ -100,6 +100,17 @@ function start(){
 	SetChessSounds(ChessSounds);
 	drawChessBoard(DisplayPosition);
 	GameState.legalMoves = getLegalMoves(GameState.position);
+
+
+	//set edit mode icons
+	setBoardEditIcons(true);
+}
+
+function setBoardEditIcons(isWhite){
+	let offset = isWhite ? 1 : 0;
+	for (let bI = 0; bI < 6; bI++) {
+		editButtons[bI + 2].firstChild.src = PiecesImages[(bI * 2) + offset].src;
+	}
 }
 
 document.addEventListener('keydown', (event) => {
@@ -116,7 +127,8 @@ editColorToggle.addEventListener("click", (event)=>{
 	appState.editWhiteMode = !appState.editWhiteMode;
 	editColorToggle.style.backgroundColor = appState.editWhiteMode ? "rgb(228, 228, 228)" : "rgb(36, 36, 36)";
 	editColorToggle.style.color = appState.editWhiteMode ? "rgb(36, 36, 36)" : "rgb(228, 228, 228)";
-	editColorToggle.innerHTML = appState.editWhiteMode ? "white" : "black";
+
+	setBoardEditIcons(appState.editWhiteMode);
 });
 
 /* 0 delete 1 move 2 king 3 queen 4 rook 5 bishop 6 knight 7 pawn */
