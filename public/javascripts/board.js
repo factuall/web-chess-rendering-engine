@@ -7,6 +7,7 @@ let ColorSquareWhite = '#f0d9b5';
 let ColorSquareBlack = '#b58863';
 let ColorDestination = "rgba(0, 0, 0, 0.49)"
 let ColorArrow = "rgba(81, 221, 90, 0.7)";
+let ColorArrowAlt = "rgba(221, 81, 81, 0.7)";
 let PiecesImages = [];
 let ChessSounds = [];
 let DisplayPosition = [];
@@ -67,8 +68,8 @@ export function drawLineAbs(xFrom, yFrom, xTo, yTo, lineWidth, color){
 //stolen from StackOverflow with slight modifications to match my case
 function drawArrow(fromx, fromy, tox, toy){
     //letiables to be used when creating the arrow
-    let width = SquareSize / 7;
-    let headlen = SquareSize/8;
+    let width = SquareSize / 8;
+    let headlen = SquareSize / 3;
     let angle = Math.atan2(toy-fromy,tox-fromx);
     // This makes it so the end of the arrow head is located at tox, toy, don't ask where 1.15 comes from
     tox -= Math.cos(angle) * ((width*1.15));
@@ -102,7 +103,7 @@ function drawArrow(fromx, fromy, tox, toy){
 
     //draws the paths created above
     CTX.strokeStyle = ColorArrow;
-    CTX.lineWidth = width;
+    CTX.lineWidth = 1;
     CTX.stroke();
     CTX.fillStyle = ColorArrow;
     CTX.fill();
@@ -191,6 +192,7 @@ export function drawChessBoard(position){
 
 
 function drawBoard(flipped){
+    console.log("draw call");
     let squareIndex = 0;
     for (let posY = 0; posY < 8; posY++) {
         for (let posX = 0; posX < 8; posX++) {
@@ -323,7 +325,7 @@ function updateMouse(){
         rerender = true;
     } 
 
-	if(rerender = true){
+	if(rerender == true){
 		drawChessBoard(DisplayPosition);
 		rerender = false;
 	}
@@ -555,16 +557,31 @@ function updateMouse(){
         }
         arrowTo.x = mSqX;
         arrowTo.y = mSqY;
+        rerender = true;
     }
     if(!mouseTwoDown && arrowFrom.x != -1){
         arrowTo.x = mSqX;
         arrowTo.y = mSqY;
-        arrowsToDraw.push([
-            {x: arrowFrom.x, y: arrowFrom.y},
-            {x: arrowTo.x, y: arrowTo.y}
-        ]);
+        let newArrow = true;
+        for (let aI = 0; aI < arrowsToDraw.length; aI++) { //removing the arrow if trying to draw two at the same origin and destination
+            if(arrowsToDraw[aI][0].x == arrowFrom.x &&
+                arrowsToDraw[aI][0].y == arrowFrom.y &&
+                arrowsToDraw[aI][1].x == arrowTo.x &&
+                arrowsToDraw[aI][1].y == arrowTo.y 
+            ){ 
+                newArrow = false;
+                arrowsToDraw.splice(aI, 1);
+            }
+        } 
+        if(newArrow)
+            arrowsToDraw.push([
+                {x: arrowFrom.x, y: arrowFrom.y},
+                {x: arrowTo.x, y: arrowTo.y}
+            ]);
         arrowFrom.x = -1;
+        drawChessBoard(DisplayPosition);
     }
+
 }
 
 CANVAS.addEventListener('mousedown', function(event){
