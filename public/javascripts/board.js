@@ -1,5 +1,5 @@
-import {DEBUG_SHOW_NUMBERS, DEBUG_SHOWPOS_ONHOVER, APPLY_CHESS_RULES, CurrentPosition, ShowPositionSideCharacters, GameState, playerMoved, kingMoved, rookMoved, getGameState, getAppState} from "./globals.js";
-import { positionToFen, getPossiblePieceMoves, indexToCoords, getLegalMoves, isPieceWhite } from "./chess-utils.js";
+import {DEBUG_SHOW_NUMBERS, DEBUG_SHOWPOS_ONHOVER, APPLY_CHESS_RULES, CurrentPosition, ShowPositionSideCharacters, GameState, playerMoved, kingMoved, rookMoved, getGameState, getAppState, setGameState} from "./globals.js";
+import { positionToFen, getPossiblePieceMoves, indexToCoords, getLegalMoves, isPieceWhite, performMove } from "./chess-utils.js";
 
 let SquareSize = 100;
 let PieceSize = 98;
@@ -495,61 +495,7 @@ function updateMouse(){
                 else 
                     ChessSounds[0].play();
                 
-                //losing castle rights after moving a king
-                if(gs.position[pieceHeldIndex] === 'K'){
-                    kingMoved(true);
-                }
-                if(gs.position[pieceHeldIndex] === 'k'){
-                    kingMoved(false);
-                }
-
-                //rook moved
-                if(selectedMove.from === 56) rookMoved(true, false)//a1
-                if(selectedMove.from === 63) rookMoved(true, true)//h1
-                if(selectedMove.from === 0) rookMoved(false, false)//a8
-                if(selectedMove.from === 7) rookMoved(false, true)//h8
-
-                //pawn double square move
-                if(selectedMove.doublePawnMove === true){
-                    gs.enPassant = selectedMove.to;
-                }else{
-                    gs.enPassant = -1;
-                }
-
-                if(isPieceWhite(gs.position[selectedMove.from])){
-                    if(selectedMove.isCastleK){
-                        gs.position[63] = 'x';
-                        gs.position[61] = 'R';
-                    }
-    
-                    if(selectedMove.isCastleQ){
-                        gs.position[56] = 'x';
-                        gs.position[59] = 'R';
-                    }
-                }else{
-                    if(selectedMove.isCastleK){
-                        gs.position[7] = 'x';
-                        gs.position[5] = 'r';
-                    }
-    
-                    if(selectedMove.isCastleQ){
-                        gs.position[0] = 'x';
-                        gs.position[3] = 'r';
-                    }
-                }
-
-                //en passant
-                if(selectedMove.enPassant === true){
-                    if(isPieceWhite(gs.position[pieceHeldIndex])){
-                        gs.position[selectedMove.to + 8] = 'x';
-                    }else{
-                        gs.position[selectedMove.to - 8] = 'x';
-                    }
-                }
-
-                gs.position[mIndex] = gs.position[pieceHeldIndex];
-                if(mIndex != pieceHeldIndex)gs.position[pieceHeldIndex] = 'x';
-                gs.legalMoves = getLegalMoves(gs.position);
+                performMove(GameState, selectedMove);
             }
             DisplayPosition = gs.position.slice();
             pieceHeldIndex = -1;
