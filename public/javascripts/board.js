@@ -1,5 +1,6 @@
 import {DEBUG_SHOW_NUMBERS, DEBUG_SHOWPOS_ONHOVER, APPLY_CHESS_RULES, CurrentPosition, ShowPositionSideCharacters, GameState, playerMoved, kingMoved, rookMoved, getGameState, getAppState, setGameState} from "./globals.js";
 import { positionToFen, getPossiblePieceMoves, indexToCoords, getLegalMoves, isPieceWhite, performMove } from "./chess-utils.js";
+import { historyAppend } from "./side-menu.js";
 
 let SquareSize = 100;
 let PieceSize = 98;
@@ -495,7 +496,10 @@ function updateMouse(){
                 else 
                     ChessSounds[0].play();
                 
-                performMove(GameState, selectedMove);
+                performMove(gs, selectedMove);
+                gs.moveHistory.push({position: gs.position, move: selectedMove});
+                historyAppend({position: gs.position, move: selectedMove});
+                console.log(gs.moveHistory);
             }
             DisplayPosition = gs.position.slice();
             pieceHeldIndex = -1;

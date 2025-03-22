@@ -23,6 +23,7 @@ export const AppState = {
 export let GameState = {
     position: [],
     legalMoves: [],
+    moveHistory: [],
 	whiteMoves: true,
 	canWhiteCastleQ: true,
 	canBlackCastleQ: true,

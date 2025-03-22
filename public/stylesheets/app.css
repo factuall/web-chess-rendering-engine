@@ -110,7 +110,7 @@ button{
   transform : translate(52%, 0);
   height: 600px;
   width: 300px;
-  background-color: rgb(53, 53, 53);
+  background-color: #353535;
   border: 2px solid black;
   padding: 8px;
   border-radius: 8px;
@@ -130,5 +130,29 @@ button{
   padding: 4px;
   margin-top: 8px;
   height: 90%;
+}
+
+.side-history-table{
+  width: 100%;
+}
+
+.history-row{
+  display: flex;
+  width: 100%;
+  align-items: center;
+
+}
+
+.history-index{
+  width: 15%;
+  background-color: #353535;
+  padding: 4px;
+  text-align: center;
+}
+
+.history-move{
+  width: 35%;
+  padding: 4px;
+  border: 2px solid black;
 }
 

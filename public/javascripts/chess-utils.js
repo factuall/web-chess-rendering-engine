@@ -431,7 +431,7 @@ export function performMove(gameState, move){
 
 		//en passant
 		if(move.enPassant === true){
-			if(isPieceWhite(gameState.position[pieceHeldIndex])){
+			if(isPieceWhite(gameState.position[move.from])){
 				gameState.position[move.to + 8] = 'x';
 			}else{
 				gameState.position[move.to - 8] = 'x';
