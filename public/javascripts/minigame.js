@@ -1,5 +1,5 @@
 import {CurrentPosition, setCurrentPosition, toggleSideCharacters} from "./globals.js"
-import { interpretFen, positionToFen, indexToCoords, indexToPosition } from "./chess-utils.js"
+import { interpretFen, gameStateToFEN, indexToCoords, indexToPosition } from "./chess-utils.js"
 import { SetPieceImages, drawChessBoard } from "./board.js"
 
 //PUBLIC FLAGS
@@ -74,8 +74,8 @@ function incrementCounter() {
 }
 
 toggleSideCharacters();
-var DisplayPosition = StartingPosition.slice();
-setCurrentPosition(StartingPosition.slice());
+var DisplayPosition = StartingPosition.position.slice();
+setCurrentPosition(StartingPosition.position.slice());
 
 function Start(){
     SetPieceImages(PiecesImages);

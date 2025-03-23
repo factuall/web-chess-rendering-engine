@@ -1,5 +1,5 @@
 import {DEBUG_SHOWPOS_ONHOVER, SquareSize, PieceSize, setCurrentPosition, GameState, getAppState, setGameState} from "./globals.js"
-import {interpretFen, positionToFen, getLegalMoves} from "./chess-utils.js"
+import {interpretFen, gameStateToFEN, getLegalMoves} from "./chess-utils.js"
 import { SetChessSounds, SetPieceImages, drawChessBoard } from "./board.js"
 
 const CANVAS = document.getElementById("board-canvas");

@@ -1,5 +1,5 @@
 import {DEBUG_SHOW_NUMBERS, DEBUG_SHOWPOS_ONHOVER, APPLY_CHESS_RULES, CurrentPosition, ShowPositionSideCharacters, GameState, playerMoved, kingMoved, rookMoved, getGameState, getAppState, setGameState} from "./globals.js";
-import { positionToFen, getPossiblePieceMoves, indexToCoords, getLegalMoves, isPieceWhite, performMove } from "./chess-utils.js";
+import { gameStateToFEN, getPossiblePieceMoves, indexToCoords, getLegalMoves, isPieceWhite, performMove } from "./chess-utils.js";
 import { historyAppend } from "./side-menu.js";
 
 let SquareSize = 100;
@@ -490,13 +490,16 @@ function updateMouse(){
                 }
             }
             if(isLegalMove){
-                playerMoved(); //flip whiteMoves, I have to come up with better name for this function
+                gs.whiteMoves = !gs.whiteMoves;
                 if(isCapture) 
                     ChessSounds[1].play();
                 else 
                     ChessSounds[0].play();
                 
+                if(selectedMove.isCastleK || selectedMove.isCastleQ) ChessSounds[2].play();
+                
                 performMove(gs, selectedMove);
+                gs.legalMoves = getLegalMoves(gs);
                 gs.moveHistory.push({position: gs.position, move: selectedMove});
                 historyAppend({position: gs.position, move: selectedMove});
                 console.log(gs.moveHistory);
@@ -581,7 +584,7 @@ function applyFen(){
 
 function updateFenBar(){
     if(FenInput != null)
-	FenInput.value = positionToFen(getGameState().position);
+	FenInput.value = gameStateToFEN(getGameState());
 }
 
 document.addEventListener('keydown', (event) => {

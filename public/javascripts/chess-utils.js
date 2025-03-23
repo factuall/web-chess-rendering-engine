@@ -59,17 +59,17 @@ export function indexToPosition(index){
 	return String.fromCharCode('a'.charCodeAt(0) + coords.x) + (8 - coords.y);
 }
 
-export function positionToFen(position, GameState){
+export function gameStateToFEN(gameState){
 	let fen = "";
 	for (let posY = 0; posY < 8; posY++) {
 		
 		let emptyCounter = 0;
 		for (let posX = 0; posX < 8; posX++) {
 			let offset = posX + (posY * 8);
-			if(position[offset] === 'x'){
+			if(gameState.position[offset] === 'x'){
 				emptyCounter++;
 				if(posX < 7 ){
-					if(position[offset+1] != 'x'){
+					if(gameState.position[offset+1] != 'x'){
 						fen += emptyCounter;
 						emptyCounter = 0;
 					}
@@ -84,12 +84,11 @@ export function positionToFen(position, GameState){
 					fen += emptyCounter;
 					emptyCounter = 0;
 				}
-				fen += position[offset]	
+				fen += gameState.position[offset]	
 			}
 		}
 		if(posY < 7) fen += '/';
 	}
-	//TODO: actually grab the GameState from the argument instead of getting it right here and update all of the functions in the rest of the code
 	let lGameState = getGameState(); 
 	let colorMoving = lGameState.whiteMoves ? 'w' : 'b';
 	fen += ` ${colorMoving} `;
@@ -172,20 +171,15 @@ export function getLegalMoves(gameState){
 
 	let allPieceMoves = getAllPseudoLegalMoves(gameState);
 	let allLegalMoves = allPieceMoves.slice();
-	let allNewPositions = getAllPossiblePositions(gameState.position, allPieceMoves);
-	let imaginaryGameState;
+	let allNewPositions = getAllPossibleGameStates(gameState, allPieceMoves);
 	let movesRemoved = 0;
 	for (let pos = 0; pos < allNewPositions.length; pos++) {
-		//TODO: take account of the fact that the castle abilities might change in some of these positions
-		imaginaryGameState = structuredClone(gameState);
-		imaginaryGameState.whiteMoves = !gameState.whiteMoves;
-		imaginaryGameState.position = allNewPositions[pos];
 		//console.log(allNewPositions[pos]);
-		let imaginaryMoves = getAllPseudoLegalMoves(imaginaryGameState);
+		let imaginaryMoves = getAllPseudoLegalMoves(allNewPositions[pos]);
 		for (let iM = 0; iM < imaginaryMoves.length; iM++) {
 			if(!imaginaryMoves[iM].isCapture) continue;
-			if((imaginaryMoves[iM].to === whiteKingPos && !imaginaryGameState.whiteMoves) ||
-			(imaginaryMoves[iM].to === blackKingPos && imaginaryGameState.whiteMoves)){
+			if((imaginaryMoves[iM].to === whiteKingPos && !allNewPositions[pos].whiteMoves) ||
+			(imaginaryMoves[iM].to === blackKingPos && allNewPositions[pos].whiteMoves)){
 				//console.log(allPieceMoves[pos], imaginaryMoves[iM]);
 				//console.log(allLegalMoves, pos);
 				//allLegalMoves.splice(pos-movesRemoved, 1);
@@ -316,7 +310,7 @@ export function getPossiblePieceMoves(position, pieceIndex, piece, gameState){
 			return pieceMoves;
 			break;
 		case 'p':
-		case "P": //TODO: prevent from capturing a piece on the other side of the board caused by the board-table wrapping
+		case "P":
 			let range = 1;
 			if ((isWhite && indexToCoords(pieceIndex).y === 6) || 
 				(!isWhite && indexToCoords(pieceIndex).y === 1))
@@ -326,23 +320,24 @@ export function getPossiblePieceMoves(position, pieceIndex, piece, gameState){
 			for (let dist = 0; dist < SqEdgeDistances[pieceIndex][dir]; dist++) {
 				let isDestWhite;
 				destinationIndex += SqDirectionOffsets[dir];
+				let pieceCoords = indexToCoords(pieceIndex);
 				if(dist === 0){//capturing moves
-					if(position[destinationIndex-1] != 'x'){
+					if(position[destinationIndex-1] != 'x' && pieceCoords.x < 0){
 						isDestWhite = position[destinationIndex-1].toUpperCase() === position[destinationIndex-1];
 						if(isWhite != isDestWhite)
 							pieceMoves.push({from: pieceIndex, to: destinationIndex-1, isCapture: true});
 					}
-					if(position[destinationIndex+1] != 'x'){
+					if(position[destinationIndex+1] != 'x' && pieceCoords.x < 7){
 						isDestWhite = position[destinationIndex+1].toUpperCase() === position[destinationIndex+1];
 						if(isWhite != isDestWhite)
 							pieceMoves.push({from: pieceIndex, to: destinationIndex+1, isCapture: true});
 					}
 					if(gameState.enPassant > -1){
 						let enPassantOffset = isWhite ? -8 : 8;
-						if(gameState.enPassant === pieceIndex+1){
+						if(gameState.enPassant === pieceIndex-1 && pieceCoords.x > 0){
 							pieceMoves.push({from: pieceIndex, to: gameState.enPassant+enPassantOffset, isCapture: true, enPassant: true});
 						}
-						if(gameState.enPassant === pieceIndex-1){
+						if(gameState.enPassant === pieceIndex+1 && pieceCoords.x < 7){
 							pieceMoves.push({from: pieceIndex, to: gameState.enPassant+enPassantOffset, isCapture: true, enPassant: true});
 						}
 					}
@@ -440,22 +435,20 @@ export function performMove(gameState, move){
 
 		gameState.position[move.to] = gameState.position[move.from];
 		gameState.position[move.from] = 'x';
-		gameState.legalMoves = getLegalMoves(gameState);
 }
 
 export function isPieceWhite(piece){
 	return piece.toUpperCase() === piece;
 }
 
-function getAllPossiblePositions(position, moves){
-	let possiblePositions = [];
+function getAllPossibleGameStates(gameState, moves){
+	let possibleGS = [];
 	for (let i = 0; i < moves.length; i++) {
-		let newPosition = position.slice();
-		newPosition[moves[i].to] = newPosition[moves[i].from];
-		newPosition[moves[i].from] = 'x';
-		possiblePositions.push(newPosition);
+		let newGS = structuredClone(gameState);
+		performMove(newGS, moves[i]);
+		possibleGS.push(newGS);
 	}
-	return possiblePositions;
+	return possibleGS;
 }
 
 function isSquareAttacked(position, checkedSquare, isAttackerWhite){
