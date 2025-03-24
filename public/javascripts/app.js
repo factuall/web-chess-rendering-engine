@@ -1,6 +1,6 @@
 import {DEBUG_SHOWPOS_ONHOVER, SquareSize, PieceSize, setCurrentPosition, GameState, getAppState, setGameState} from "./globals.js"
 import {interpretFen, gameStateToFEN, getLegalMoves} from "./chess-utils.js"
-import { SetChessSounds, SetPieceImages, drawChessBoard } from "./board.js"
+import { SetChessSounds, SetPieceImages, drawChessBoard, resizeBoard } from "./board.js"
 
 const CANVAS = document.getElementById("board-canvas");
 
@@ -71,41 +71,6 @@ function loadSounds(soundSet){
 	ChessSounds[3].src = `/sounds/${soundSet}/game-end.wav`;
 }
 
-loadPieces();
-loadSounds("chesscom");
-let allAssets = PiecesImages.concat(ChessSounds);
-var len = PiecesImages.length,
-    counter = 0;
-
-[].forEach.call( allAssets, function( asset ) {
-    if(asset.complete)
-      incrementCounter();
-    else
-      asset.addEventListener( 'load', incrementCounter, false );
-} );
-
-function incrementCounter() {
-    counter++;
-    if ( counter === len ) {
-        start();
-    }
-}
-
-
-var DisplayPosition = StartingPosition.position.slice();
-setCurrentPosition(StartingPosition.position.slice());
-
-function start(){
-	SetPieceImages(PiecesImages);
-	SetChessSounds(ChessSounds);
-	drawChessBoard(DisplayPosition);
-	GameState.legalMoves = getLegalMoves(GameState.position);
-
-
-	//set edit mode icons
-	setBoardEditIcons(true);
-}
-
 function setBoardEditIcons(isWhite){
 	let offset = isWhite ? 1 : 0;
 	for (let bI = 0; bI < 6; bI++) {
@@ -161,3 +126,48 @@ applyFenButton.addEventListener('click', (event) => {
 	GameState.legalMoves = getLegalMoves(GameState);
 	drawChessBoard(GameState.position);
 });
+
+windowResized();
+addEventListener("resize", (e) => {
+	windowResized();
+});
+
+function windowResized(){
+	let squareMin = Math.min(window.innerHeight, window.innerWidth);
+	if(window.innerWidth<(window.innerHeight*1.35)) squareMin /= 1.15;
+	resizeBoard(squareMin-(squareMin/4));
+}
+
+loadPieces();
+loadSounds("chesscom");
+let allAssets = PiecesImages.concat(ChessSounds);
+var len = PiecesImages.length,
+    counter = 0;
+
+[].forEach.call( allAssets, function( asset ) {
+    if(asset.complete)
+      incrementCounter();
+    else
+      asset.addEventListener( 'load', incrementCounter, false );
+} );
+
+function incrementCounter() {
+    counter++;
+    if ( counter === len ) {
+        start();
+    }
+}
+
+var DisplayPosition = StartingPosition.position.slice();
+setCurrentPosition(StartingPosition.position.slice());
+
+function start(){
+	SetPieceImages(PiecesImages);
+	SetChessSounds(ChessSounds);
+	drawChessBoard(DisplayPosition);
+	GameState.legalMoves = getLegalMoves(GameState.position);
+
+
+	//set edit mode icons
+	setBoardEditIcons(true);
+}

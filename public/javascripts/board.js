@@ -592,3 +592,11 @@ document.addEventListener('keydown', (event) => {
     drawChessBoard(DisplayPosition);
     if(event.key === 'x') getPossiblePieceMoves(GameState.position, 9);
 });
+
+export function resizeBoard(sizePx){
+    CANVAS.width = sizePx;
+    CANVAS.height = sizePx;
+    SquareSize = sizePx/8;
+    PieceSize = SquareSize-2;
+    drawChessBoard(DisplayPosition);
+}
