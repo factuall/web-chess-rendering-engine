@@ -23,6 +23,7 @@ export function interpretFen(fen){
 	let gameState = {
 		position: pieces,
 		legalMoves: [],
+		moveHistory: [],
 		whiteMoves: ntFragments[1] === 'w' ? true : false,
 		canWhiteCastleQ: false,
 		canBlackCastleQ: false,
@@ -159,35 +160,27 @@ precomputeEdgeDistances();
 export function getLegalMoves(gameState){
 	gameState = getGameState();
 	let position = getGameState().position;
-	let whiteKingPos = -1, blackKingPos = -1; //start with negative number as we did not find anything yer
-	for (let p = 0; p < 64; p++) {
-		if(position[p] === 'K')
-			whiteKingPos = p;
-		if(position[p] === 'k')
-			blackKingPos = p;
-		if(whiteKingPos > -1 && blackKingPos > -1) //both kings found
-			break;
-	}
+
 
 	let allPieceMoves = getAllPseudoLegalMoves(gameState);
 	let allLegalMoves = allPieceMoves.slice();
-	let allNewPositions = getAllPossibleGameStates(gameState, allPieceMoves);
+	let allResultingGS = getAllPossibleGameStates(gameState, allPieceMoves);
 	let movesRemoved = 0;
-	for (let pos = 0; pos < allNewPositions.length; pos++) {
+	for (let pos = 0; pos < allResultingGS.length; pos++) {
 		//console.log(allNewPositions[pos]);
-		let imaginaryMoves = getAllPseudoLegalMoves(allNewPositions[pos]);
+		let imaginaryMoves = getAllPseudoLegalMoves(allResultingGS[pos]);
 		for (let iM = 0; iM < imaginaryMoves.length; iM++) {
 			if(!imaginaryMoves[iM].isCapture) continue;
-			if((imaginaryMoves[iM].to === whiteKingPos && !allNewPositions[pos].whiteMoves) ||
-			(imaginaryMoves[iM].to === blackKingPos && allNewPositions[pos].whiteMoves)){
-				//console.log(allPieceMoves[pos], imaginaryMoves[iM]);
-				//console.log(allLegalMoves, pos);
-				//allLegalMoves.splice(pos-movesRemoved, 1);
+			let kingsPos = findKingsInPos(allResultingGS[pos].position);
+			if((imaginaryMoves[iM].to == kingsPos.white && !allResultingGS[pos].whiteMoves) ||
+			(imaginaryMoves[iM].to == kingsPos.black && allResultingGS[pos].whiteMoves)){
+				allLegalMoves.splice(pos-movesRemoved, 1);
 				movesRemoved += 1;
 				break;
 			}
 		}
 	}
+	console.log("");
 	return allLegalMoves;
 }
 
@@ -207,7 +200,6 @@ export function getPossiblePieceMoves(position, pieceIndex, piece, gameState){
 	let pieceMoves = [];
 	let isWhite = (piece.toUpperCase() === piece); 
 	if(gameState.whiteMoves && !isWhite) return pieceMoves;
-	
 	if(!gameState.whiteMoves && isWhite) return pieceMoves;
 	if(piece === 'x') return pieceMoves;
 	switch(piece){
@@ -446,12 +438,13 @@ function getAllPossibleGameStates(gameState, moves){
 	for (let i = 0; i < moves.length; i++) {
 		let newGS = structuredClone(gameState);
 		performMove(newGS, moves[i]);
+		newGS.whiteMoves = !newGS.whiteMoves;
 		possibleGS.push(newGS);
 	}
 	return possibleGS;
 }
 
-function isSquareAttacked(position, checkedSquare, isAttackerWhite){
+export function isSquareAttacked(position, checkedSquare, isAttackerWhite){
 	let attacked = false;
 	let imaginaryGameState = {position: position, whiteMoves: isAttackerWhite};
 	let imaginaryMoves = getAllPseudoLegalMoves(imaginaryGameState);
@@ -462,4 +455,17 @@ function isSquareAttacked(position, checkedSquare, isAttackerWhite){
 		}
 	}
 	return attacked;
+}
+
+export function findKingsInPos(position){
+	let whiteKingPos = -1, blackKingPos = -1; //start with negative number as we did not find anything yer
+	for (let p = 0; p < 64; p++) {
+		if(position[p] === 'K')
+			whiteKingPos = p;
+		if(position[p] === 'k')
+			blackKingPos = p;
+		if(whiteKingPos > -1 && blackKingPos > -1) //both kings found
+			break;
+	}
+	return {white: whiteKingPos, black: blackKingPos};
 }

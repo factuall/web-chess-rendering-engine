@@ -66,9 +66,11 @@ function loadSounds(soundSet){
 	ChessSounds.push(new Audio());
 	ChessSounds[2].src = `/sounds/${soundSet}/castle.wav`;
 	ChessSounds.push(new Audio());
-	ChessSounds[3].src = `/sounds/${soundSet}/game-start.wav`;
+	ChessSounds[3].src = `/sounds/${soundSet}/check.mp3`;
 	ChessSounds.push(new Audio());
-	ChessSounds[3].src = `/sounds/${soundSet}/game-end.wav`;
+	ChessSounds[4].src = `/sounds/${soundSet}/game-start.wav`;
+	ChessSounds.push(new Audio());
+	ChessSounds[5].src = `/sounds/${soundSet}/game-end.wav`;
 }
 
 function setBoardEditIcons(isWhite){
