@@ -229,9 +229,9 @@ function drawBoard(flipped){
             let isDebugSquare = (DEBUG_SHOWPOS_ONHOVER && posX === mouseSq.x && posY === mouseSq.y);
             if((posY === 7 && ShowPositionSideCharacters) || isDebugSquare){ //draw letters at the bottom of the board
                 DrawText(
-                    (posX * SquareSize) + 84, 
+                    (posX * SquareSize) + (SquareSize * 0.84), 
                     (posY * SquareSize) + SquareSize - 4,
-                    '25px',
+                    `${SquareSize/4}px`,
                     posY % 2 != 0 ? 
                     (squareIndex % 2 === 0 ? ColorSquareWhite : ColorSquareBlack) : (squareIndex % 2 === 0 ? ColorSquareBlack : ColorSquareWhite),
                     flipped ? String.fromCharCode(104 - posX) : String.fromCharCode(97 + posX)
@@ -240,9 +240,9 @@ function drawBoard(flipped){
             
             if((posX === 0 && ShowPositionSideCharacters) || isDebugSquare){ //draw numbers on the left side of the board
                 DrawText(
-                    (posX * SquareSize) + 2, 
-                    (posY * SquareSize) + 22,
-                    '25px',
+                    (posX * SquareSize) + (SquareSize * 0.02), 
+                    (posY * SquareSize) + (SquareSize * 0.22),
+                    `${SquareSize/4}px`,
                     posY % 2 != 0 ? 
                     (squareIndex % 2 === 0 ? ColorSquareWhite : ColorSquareBlack) : (squareIndex % 2 === 0 ? ColorSquareBlack : ColorSquareWhite),
                     flipped ? 1 + posY : 8 - posY

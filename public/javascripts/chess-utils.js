@@ -174,7 +174,7 @@ export function getLegalMoves(gameState){
 			let kingsPos = findKingsInPos(allResultingGS[pos].position);
 			if((imaginaryMoves[iM].to == kingsPos.white && !allResultingGS[pos].whiteMoves) ||
 			(imaginaryMoves[iM].to == kingsPos.black && allResultingGS[pos].whiteMoves)){
-				allLegalMoves.splice(pos-movesRemoved, 1);
+				//allLegalMoves.splice(pos-movesRemoved, 1);
 				movesRemoved += 1;
 				break;
 			}
@@ -314,7 +314,7 @@ export function getPossiblePieceMoves(position, pieceIndex, piece, gameState){
 				destinationIndex += SqDirectionOffsets[dir];
 				let pieceCoords = indexToCoords(pieceIndex);
 				if(dist === 0){//capturing moves
-					if(position[destinationIndex-1] != 'x' && pieceCoords.x < 0){
+					if(position[destinationIndex-1] != 'x' && pieceCoords.x > 0){
 						isDestWhite = position[destinationIndex-1].toUpperCase() === position[destinationIndex-1];
 						if(isWhite != isDestWhite)
 							pieceMoves.push({from: pieceIndex, to: destinationIndex-1, isCapture: true});
