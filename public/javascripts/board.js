@@ -1,5 +1,5 @@
 import {DEBUG_SHOW_NUMBERS, DEBUG_SHOWPOS_ONHOVER, APPLY_CHESS_RULES, CurrentPosition, ShowPositionSideCharacters, GameState, playerMoved, kingMoved, rookMoved, getGameState, getAppState, setGameState} from "./globals.js";
-import { gameStateToFEN, getPossiblePieceMoves, indexToCoords, getLegalMoves, isPieceWhite, performMove, isSquareAttacked, findKingsInPos } from "./chess-utils.js";
+import { gameStateToFEN, getPossiblePieceMoves, indexToCoords, getLegalMoves, isPieceWhite, performMove, isSquareAttacked, findKingsInPos, interpretFen } from "./chess-utils.js";
 import { historyAppend } from "./side-menu.js";
 
 let SquareSize = 100;
@@ -504,8 +504,9 @@ function updateMouse(){
                    isSquareAttacked(gs.position, kingsPos.black, true)) ChessSounds[3].play();
                 
                 gs.legalMoves = getLegalMoves(gs);
-                gs.moveHistory.push({position: gs.position, move: selectedMove});
-                historyAppend({position: gs.position, move: selectedMove});
+                gs.moveHistory.push({fen: gameStateToFEN(gs), move: selectedMove});
+                historyAppend(gs.moveHistory[gs.moveHistory.length-1]);
+                historyViewed = gs.moveHistory.length-1;
             }
             DisplayPosition = gs.position.slice();
             pieceHeldIndex = -1;
@@ -590,10 +591,29 @@ function updateFenBar(){
 	FenInput.value = gameStateToFEN(getGameState());
 }
 
+let historyViewed = -1;
 document.addEventListener('keydown', (event) => {
-    if(event.key === 'f') boardFlipped = !boardFlipped;
+    switch(event.key){
+        case "f":
+            boardFlipped = !boardFlipped;
+        break;
+        case "ArrowLeft":
+            if(historyViewed > 0) {
+                historyViewed--;
+                historyJump(historyViewed);
+            }
+        break;
+        case "ArrowRight":
+            if(historyViewed < getGameState().moveHistory.length-1) {
+                historyViewed++;
+                historyJump(historyViewed);
+            }
+        break;
+    }
+    if(event.key === 'f') 
     drawChessBoard(DisplayPosition);
     if(event.key === 'x') getPossiblePieceMoves(GameState.position, 9);
+    
 });
 
 export function resizeBoard(sizePx){
@@ -602,4 +622,15 @@ export function resizeBoard(sizePx){
     SquareSize = sizePx/8;
     PieceSize = SquareSize-2;
     drawChessBoard(DisplayPosition);
+}
+
+document.addEventListener("history-jump", (e)=>{historyJump(e.detail)});
+function historyJump(historyIndex){
+    let gs = getGameState();
+    drawChessBoard(interpretFen(gs.moveHistory[historyIndex].fen).position);
+    drawPing(
+        indexToCoords(gs.moveHistory[historyIndex].move.from),
+        indexToCoords(gs.moveHistory[historyIndex].move.to)
+    );
+    historyViewed = historyIndex;
 }

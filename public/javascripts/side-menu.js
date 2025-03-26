@@ -17,11 +17,20 @@ export function historyAppend(entry){
 
         historyTable.appendChild(lastTableRow);
         lastTableRow.appendChild(rowIndex);
-
     }
 
     let newMove = document.createElement("div");
     newMove.classList.add("history-move");
     newMove.innerHTML = indexToPosition(entry.move.from) + " > " + indexToPosition(entry.move.to);
     lastTableRow.appendChild(newMove);
+
+    let moveIndex = moveHistory.length-1;
+    newMove.addEventListener("click", ()=>{
+        jumpInHistory(moveIndex);
+    });
+}
+
+function jumpInHistory(historyIndex){
+    let eventHistoryJump = new CustomEvent("history-jump", {detail: historyIndex});
+    document.dispatchEvent(eventHistoryJump);
 }
