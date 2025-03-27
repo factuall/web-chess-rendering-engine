@@ -149,3 +149,6 @@ button{
   border: 2px solid black;
 }
 
+.history-move-highlighted{
+  background-color: #646464 !important;
+}

@@ -5,9 +5,14 @@ export let ShowPositionSideCharacters = true;
 export let SquareSize = 100;
 export let PieceSize = 98;
 export let CurrentPosition = [];
+export let StartingPosition;
 
 export function setCurrentPosition(position){
     GameState.position = position;
+}
+
+export function setStartingPosition(position){
+    StartingPosition = position;
 }
 
 export function toggleSideCharacters(){

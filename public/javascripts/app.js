@@ -1,4 +1,4 @@
-import {DEBUG_SHOWPOS_ONHOVER, SquareSize, PieceSize, setCurrentPosition, GameState, getAppState, setGameState} from "./globals.js"
+import {DEBUG_SHOWPOS_ONHOVER, SquareSize, PieceSize, setCurrentPosition, GameState, getAppState, setGameState, StartingPosition, setStartingPosition} from "./globals.js"
 import {interpretFen, gameStateToFEN, getLegalMoves} from "./chess-utils.js"
 import { SetChessSounds, SetPieceImages, drawChessBoard, resizeBoard } from "./board.js"
 
@@ -12,12 +12,6 @@ const fontRobotoFile = new FontFace(
 	"url(/fonts/Roboto-Regular.ttf)",
   );
 document.fonts.add(fontRobotoFile);
-
-
-let StartingPosition = interpretFen('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
-let TwokingsPosition = interpretFen('3k4/8/8/8/8/4K3/8/8 w KQkq - 0 1');
-let SlidingPieces = interpretFen('8/1QrBb3/8/8/8/4K3/8/8 w KQkq - 0 1');
-
 
 let PiecesImages = [];
 let ChessSounds = [];
@@ -160,10 +154,10 @@ function incrementCounter() {
     }
 }
 
-var DisplayPosition = StartingPosition.position.slice();
-setCurrentPosition(StartingPosition.position.slice());
-
 function start(){
+	setStartingPosition(interpretFen('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'));
+	var DisplayPosition = StartingPosition.position.slice();
+	setCurrentPosition(StartingPosition.position.slice());
 	SetPieceImages(PiecesImages);
 	SetChessSounds(ChessSounds);
 	drawChessBoard(DisplayPosition);

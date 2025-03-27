@@ -1,18 +1,21 @@
-import {DEBUG_SHOW_NUMBERS, DEBUG_SHOWPOS_ONHOVER, APPLY_CHESS_RULES, CurrentPosition, ShowPositionSideCharacters, GameState, playerMoved, kingMoved, rookMoved, getGameState, getAppState, setGameState} from "./globals.js";
+import {DEBUG_SHOW_NUMBERS, DEBUG_SHOWPOS_ONHOVER, APPLY_CHESS_RULES, CurrentPosition, ShowPositionSideCharacters, GameState, playerMoved, kingMoved, rookMoved, getGameState, getAppState, setGameState, StartingPosition} from "./globals.js";
 import { gameStateToFEN, getPossiblePieceMoves, indexToCoords, getLegalMoves, isPieceWhite, performMove, isSquareAttacked, findKingsInPos, interpretFen } from "./chess-utils.js";
 import { historyAppend } from "./side-menu.js";
 
 let SquareSize = 100;
 let PieceSize = 98;
+
 let ColorSquareWhite = '#f0d9b5';
 let ColorSquareBlack = '#b58863';
 let ColorDestination = "rgba(0, 0, 0, 0.49)"
 let ColorPingArrow = "rgba(81, 221, 90, 0.7)";
 let ColorPingArrowAlt = "rgba(221, 81, 81, 0.7)";
 let ColorPingSquare = "rgba(221, 165, 81, 0.7)";
+
 let PiecesImages = [];
 let ChessSounds = [];
 let DisplayPosition = [];
+
 let boardFlipped = false; 
 
 const CANVAS = document.getElementById("board-canvas");
@@ -507,6 +510,8 @@ function updateMouse(){
                 gs.moveHistory.push({fen: gameStateToFEN(gs), move: selectedMove});
                 historyAppend(gs.moveHistory[gs.moveHistory.length-1]);
                 historyViewed = gs.moveHistory.length-1;
+                let eventHistoryJumped = new CustomEvent("history-jumped", {detail: historyViewed});
+                document.dispatchEvent(eventHistoryJumped);
             }
             DisplayPosition = gs.position.slice();
             pieceHeldIndex = -1;
@@ -598,7 +603,7 @@ document.addEventListener('keydown', (event) => {
             boardFlipped = !boardFlipped;
         break;
         case "ArrowLeft":
-            if(historyViewed > 0) {
+            if(historyViewed > -1) {
                 historyViewed--;
                 historyJump(historyViewed);
             }
@@ -608,6 +613,14 @@ document.addEventListener('keydown', (event) => {
                 historyViewed++;
                 historyJump(historyViewed);
             }
+        break;
+        case "ArrowUp":
+            historyViewed = -1;
+            historyJump(historyViewed);
+        break;
+        case "ArrowDown":
+            historyViewed = getGameState().moveHistory.length-1;
+            historyJump(historyViewed);
         break;
     }
     if(event.key === 'f') 
@@ -627,10 +640,17 @@ export function resizeBoard(sizePx){
 document.addEventListener("history-jump", (e)=>{historyJump(e.detail)});
 function historyJump(historyIndex){
     let gs = getGameState();
-    drawChessBoard(interpretFen(gs.moveHistory[historyIndex].fen).position);
-    drawPing(
-        indexToCoords(gs.moveHistory[historyIndex].move.from),
-        indexToCoords(gs.moveHistory[historyIndex].move.to)
-    );
+    if(historyIndex == -1) {
+        drawChessBoard(StartingPosition.position);
+        console.log(StartingPosition);
+    }else{
+        drawChessBoard(interpretFen(gs.moveHistory[historyIndex].fen).position);
+        drawPing(
+            indexToCoords(gs.moveHistory[historyIndex].move.from),
+            indexToCoords(gs.moveHistory[historyIndex].move.to)
+        );
+    }
     historyViewed = historyIndex;
+    let eventHistoryJumped = new CustomEvent("history-jumped", {detail: historyIndex});
+    document.dispatchEvent(eventHistoryJumped);
 }
