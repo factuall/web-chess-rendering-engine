@@ -161,26 +161,22 @@ export function getLegalMoves(gameState){
 	gameState = getGameState();
 	let position = getGameState().position;
 
-
 	let allPieceMoves = getAllPseudoLegalMoves(gameState);
 	let allLegalMoves = allPieceMoves.slice();
 	let allResultingGS = getAllPossibleGameStates(gameState, allPieceMoves);
 	let movesRemoved = 0;
-	for (let pos = 0; pos < allResultingGS.length; pos++) {
-		//console.log(allNewPositions[pos]);
-		let imaginaryMoves = getAllPseudoLegalMoves(allResultingGS[pos]);
-		for (let iM = 0; iM < imaginaryMoves.length; iM++) {
-			if(!imaginaryMoves[iM].isCapture) continue;
-			let kingsPos = findKingsInPos(allResultingGS[pos].position);
-			if((imaginaryMoves[iM].to == kingsPos.white && !allResultingGS[pos].whiteMoves) ||
-			(imaginaryMoves[iM].to == kingsPos.black && allResultingGS[pos].whiteMoves)){
-				//allLegalMoves.splice(pos-movesRemoved, 1);
-				movesRemoved += 1;
-				break;
-			}
+
+	for (let pos = 0; pos < allResultingGS.length; pos++){
+		let kingsPos = findKingsInPos(allResultingGS[pos].position);
+		if(isSquareAttacked(allResultingGS[pos].position, kingsPos.white, false) && gameState.whiteMoves){
+			allLegalMoves.splice(pos-movesRemoved, 1);
+			movesRemoved += 1;
+		}
+		if(isSquareAttacked(allResultingGS[pos].position, kingsPos.black, true) && !gameState.whiteMoves){
+			allLegalMoves.splice(pos-movesRemoved, 1);
+			movesRemoved += 1;
 		}
 	}
-	console.log("");
 	return allLegalMoves;
 }
 

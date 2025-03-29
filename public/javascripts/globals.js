@@ -34,7 +34,8 @@ export let GameState = {
 	canBlackCastleQ: true,
 	canWhiteCastleK: true,
 	canBlackCastleK: true,
-    enPassant: -1
+    enPassant: -1,
+    winState: -1 //still in game; 0 - stalemate; 1 - white won; 2 - black won
 };
 
 export function playerMoved(){

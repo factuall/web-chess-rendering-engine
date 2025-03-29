@@ -493,20 +493,29 @@ function updateMouse(){
                 }
             }
             if(isLegalMove){
+                performMove(gs, selectedMove);
                 gs.whiteMoves = !gs.whiteMoves;
-                                
+                gs.legalMoves = getLegalMoves(gs);
+                
                 if(isCapture) ChessSounds[1].play();
                 else ChessSounds[0].play();
-                
                 if(selectedMove.isCastleK || selectedMove.isCastleQ) ChessSounds[2].play();
                 
-                performMove(gs, selectedMove);
-                
                 let kingsPos = findKingsInPos(gs.position);
+                let checkPlayed = false;
                 if(isSquareAttacked(gs.position, kingsPos.white, false) ||
-                   isSquareAttacked(gs.position, kingsPos.black, true)) ChessSounds[3].play();
-                
-                gs.legalMoves = getLegalMoves(gs);
+                   isSquareAttacked(gs.position, kingsPos.black, true)) {
+                    ChessSounds[3].play();
+                }
+
+                if(checkPlayed  && gs.legalMoves.length == 0){ //checkmate
+                    gs.winState = gs.whiteMoves ? 2 : 1; 
+                    ChessSounds[5].play();
+                }else if(gs.legalMoves.length == 0){ //stalemate
+                    gs.winState = 0;
+                    ChessSounds[5].play();
+                }
+
                 gs.moveHistory.push({fen: gameStateToFEN(gs), move: selectedMove});
                 historyAppend(gs.moveHistory[gs.moveHistory.length-1]);
                 historyViewed = gs.moveHistory.length-1;
