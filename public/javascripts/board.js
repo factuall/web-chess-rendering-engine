@@ -11,6 +11,7 @@ let ColorDestination = "rgba(0, 0, 0, 0.49)"
 let ColorPingArrow = "rgba(81, 221, 90, 0.7)";
 let ColorPingArrowAlt = "rgba(221, 81, 81, 0.7)";
 let ColorPingSquare = "rgba(221, 165, 81, 0.7)";
+let ColorPingSquareAlt = "rgba(221, 81, 81, 0.7)";
 
 let PiecesImages = [];
 let ChessSounds = [];
@@ -71,7 +72,7 @@ export function drawLineAbs(xFrom, yFrom, xTo, yTo, lineWidth, color){
 }
 
 //stolen from StackOverflow with slight modifications to match my case
-function drawArrow(fromx, fromy, tox, toy){
+function drawArrow(fromx, fromy, tox, toy, useAltColor){
     //letiables to be used when creating the arrow
     let width = SquareSize / 8;
     let headlen = SquareSize / 3;
@@ -90,7 +91,7 @@ function drawArrow(fromx, fromy, tox, toy){
     CTX.beginPath();
     CTX.moveTo(fromx, fromy);
     CTX.lineTo(middlePoint.x, middlePoint.y);
-    CTX.strokeStyle = ColorPingArrow;
+    CTX.strokeStyle = useAltColor ? ColorPingArrowAlt : ColorPingArrow;
     CTX.lineWidth = width;
     CTX.stroke();
     
@@ -107,10 +108,10 @@ function drawArrow(fromx, fromy, tox, toy){
     CTX.lineTo(tox-headlen*Math.cos(angle-Math.PI/7),toy-headlen*Math.sin(angle-Math.PI/7));
 
     //draws the paths created above
-    CTX.strokeStyle = ColorPingArrow;
+    CTX.strokeStyle = useAltColor ? ColorPingArrowAlt : ColorPingArrow;
     CTX.lineWidth = 1;
     CTX.stroke();
-    CTX.fillStyle = ColorPingArrow;
+    CTX.fillStyle = useAltColor ? ColorPingArrowAlt : ColorPingArrow;
     CTX.fill();
 
     CTX.lineWidth = 1; //reset the line width
@@ -163,14 +164,14 @@ export function DrawPieceAbs(x, y, piece){
 }
 
 //{x, y}, {x, y}
-function drawPing(from, to){
+function drawPing(from, to, useAltColor){
     let sizeX = Math.abs(from.x - to.x);
     let sizeY = Math.abs(from.y - to.y);
     if(from.x == to.x && from.y == to.y){//square ping
         let absFrom = {
             x: (from.x * SquareSize),
             y: (from.y * SquareSize)};
-        DrawSquare(absFrom.x, absFrom.y, SquareSize, SquareSize, ColorPingSquare);
+        DrawSquare(absFrom.x, absFrom.y, SquareSize, SquareSize, useAltColor ? ColorPingSquareAlt : ColorPingSquare);
     }else{//arrow ping
         let absFrom = {
             x: (from.x * SquareSize) + SquareSize/2,
@@ -178,7 +179,7 @@ function drawPing(from, to){
         let absTo = {
             x: (to.x * SquareSize) + SquareSize/2, 
             y: (to.y * SquareSize) + SquareSize/2};
-        drawArrow(absFrom.x, absFrom.y, absTo.x, absTo.y);
+        drawArrow(absFrom.x, absFrom.y, absTo.x, absTo.y, useAltColor);
         //drawLineAbs(absFrom.x, absFrom.y, absTo.x, absTo.y, thickness, ColorArrow);
         //if(!(sizeX == 3 && sizeY == 2) || (sizeX == 2 && sizeY == 3)){ //knight arrow
         
@@ -195,13 +196,13 @@ export function drawChessBoard(position){
 
     }
     pingSquaresToDraw.forEach((square) => {
-        drawPing(square[0], square[1]);
+        drawPing(square[0], square[1], square[2]);
     });
     pingArrowsToDraw.forEach((arrow) => {
-        drawPing(arrow[0], arrow[1]);
+        drawPing(arrow[0], arrow[1], arrow[2]);
     });
     if(pingFrom.x != -1 && (pingFrom.x != pingTo.x || pingFrom.y != pingTo.y )){
-        drawPing(pingFrom, pingTo);
+        drawPing(pingFrom, pingTo, shiftHeld);
     }
     //drawPingArrow({x: 1, y: 0}, {x: 0, y: 0});
 }
@@ -547,6 +548,16 @@ function updateMouse(){
         pingTo.x = mSqX;
         pingTo.y = mSqY;
         let newArrow = true;
+        for (let sqI = 0; sqI < pingSquaresToDraw.length; sqI++) { //removing the arrow if trying to draw two at the same origin and destination
+            if(pingSquaresToDraw[sqI][0].x == pingFrom.x &&
+                pingSquaresToDraw[sqI][0].y == pingFrom.y &&
+                pingSquaresToDraw[sqI][1].x == pingTo.x &&
+                pingSquaresToDraw[sqI][1].y == pingTo.y 
+            ){ 
+                newArrow = false;
+                pingSquaresToDraw.splice(sqI, 1);
+            }
+        } 
         for (let aI = 0; aI < pingArrowsToDraw.length; aI++) { //removing the arrow if trying to draw two at the same origin and destination
             if(pingArrowsToDraw[aI][0].x == pingFrom.x &&
                 pingArrowsToDraw[aI][0].y == pingFrom.y &&
@@ -561,12 +572,14 @@ function updateMouse(){
             if(pingFrom.x == pingTo.x && pingFrom.y == pingTo.y){
                 pingSquaresToDraw.push([
                     {x: pingFrom.x, y: pingFrom.y},
-                    {x: pingTo.x, y: pingTo.y}
+                    {x: pingTo.x, y: pingTo.y},
+                    shiftHeld 
                 ]);
             }else{
                 pingArrowsToDraw.push([
                     {x: pingFrom.x, y: pingFrom.y},
-                    {x: pingTo.x, y: pingTo.y}
+                    {x: pingTo.x, y: pingTo.y},
+                    shiftHeld
                 ]);
             }
         pingFrom.x = -1;
@@ -606,6 +619,7 @@ function updateFenBar(){
 }
 
 let historyViewed = -1;
+let shiftHeld = false;
 document.addEventListener('keydown', (event) => {
     switch(event.key){
         case "f":
@@ -631,11 +645,21 @@ document.addEventListener('keydown', (event) => {
             historyViewed = getGameState().moveHistory.length-1;
             historyJump(historyViewed);
         break;
+        case "Shift":
+            shiftHeld = true;
+        break;
     }
     if(event.key === 'f') 
     drawChessBoard(DisplayPosition);
     if(event.key === 'x') getPossiblePieceMoves(GameState.position, 9);
-    
+});
+
+document.addEventListener('keyup', (event) => {
+    switch(event.key){
+        case "Shift":
+            shiftHeld = false;
+        break;
+    }
 });
 
 export function resizeBoard(sizePx){
