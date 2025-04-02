@@ -104,11 +104,19 @@ button{
   font-size: small;
 }
 
+.side-buttons{
+  display: flex;
+  justify-content: space-around;
+  gap: 2%;
+}
+
 .side-button{
   background-color: rgb(34, 34, 34);
   border: 2px solid black;
   border-radius: 8px;
   padding: 4px 16px;
+  width: 100%;
+  text-align: center;
 }
 
 .side-history{
@@ -119,7 +127,6 @@ button{
   margin-top: 8px;
   height: 90%;
   overflow-y: auto;
-
 }
 
 .side-history-table{

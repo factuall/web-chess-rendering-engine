@@ -687,3 +687,8 @@ function historyJump(historyIndex){
     let eventHistoryJumped = new CustomEvent("history-jumped", {detail: historyIndex});
     document.dispatchEvent(eventHistoryJumped);
 }
+
+document.addEventListener("board-flip", ()=>{
+    boardFlipped = !boardFlipped;
+    drawChessBoard(DisplayPosition);
+});

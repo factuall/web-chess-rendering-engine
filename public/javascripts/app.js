@@ -105,6 +105,10 @@ for (let bI = 0; bI < 8; bI++) {
 	})
 };
 
+document.addEventListener("board-edit", ()=>{
+    toggleEditMode();
+});
+
 function toggleEditMode(){
 	let appState = getAppState();
 	appState.editMode = !appState.editMode;

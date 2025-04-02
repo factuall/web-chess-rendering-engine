@@ -1,6 +1,25 @@
 import { indexToPosition } from "./chess-utils.js";
 
 let historyTable = document.getElementById("side-history-table");
+let sideButtonFlip = document.getElementById("side-button-flip");
+let sideButtonEdit = document.getElementById("side-button-edit");
+let sideButtonNew = document.getElementById("side-button-new");
+
+sideButtonFlip.addEventListener("click", ()=>{
+    let boardFlipEvent = new CustomEvent("board-flip");
+    document.dispatchEvent(boardFlipEvent);
+});
+
+sideButtonEdit.addEventListener("click", ()=>{
+    let boardEditEvent = new CustomEvent("board-edit");
+    document.dispatchEvent(boardEditEvent);
+});
+
+sideButtonNew.addEventListener("click", ()=>{
+    let boardFlipEvent = new CustomEvent("board-new");
+    document.dispatchEvent(boardFlipEvent);
+});
+
 let moveHistory = [];
 let historyElements = [];
 let lastElementHighlighted = -1;
