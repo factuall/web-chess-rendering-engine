@@ -1,6 +1,7 @@
 import {DEBUG_SHOWPOS_ONHOVER, SquareSize, PieceSize, setCurrentPosition, GameState, getAppState, setGameState, StartingPosition, setStartingPosition} from "./globals.js"
 import {interpretFen, gameStateToFEN, getLegalMoves} from "./chess-utils.js"
 import { SetChessSounds, SetPieceImages, drawChessBoard, resizeBoard } from "./board.js"
+import { getChessSounds, getPieceImages, loadPieces, loadSounds } from "./resources.js";
 
 const CANVAS = document.getElementById("board-canvas");
 
@@ -13,54 +14,10 @@ const fontRobotoFile = new FontFace(
   );
 document.fonts.add(fontRobotoFile);
 
-let PiecesImages = [];
-let ChessSounds = [];
+let PiecesImages = getPieceImages();
+let ChessSounds = getChessSounds();
 //https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces
 //kK/qQ/rR/nN/bB/pP//
-function loadPieces(pieceSet, format){
-	PiecesImages.push(new Image());
-	PiecesImages.push(new Image());
-	PiecesImages.push(new Image());
-	PiecesImages.push(new Image());
-	PiecesImages.push(new Image());
-	PiecesImages.push(new Image());
-	PiecesImages.push(new Image());
-	PiecesImages.push(new Image());
-	PiecesImages.push(new Image());
-	PiecesImages.push(new Image());
-	PiecesImages.push(new Image());
-	PiecesImages.push(new Image());
-	PiecesImages[0].src = `/images/chess-icons/${pieceSet}/kdt.${format}`;
-	PiecesImages[1].src = `/images/chess-icons/${pieceSet}/klt.${format}`;
-	PiecesImages[2].src = `/images/chess-icons/${pieceSet}/qdt.${format}`;
-	PiecesImages[3].src = `/images/chess-icons/${pieceSet}/qlt.${format}`;
-	PiecesImages[4].src = `/images/chess-icons/${pieceSet}/rdt.${format}`;
-	PiecesImages[5].src = `/images/chess-icons/${pieceSet}/rlt.${format}`;
-	PiecesImages[6].src = `/images/chess-icons/${pieceSet}/ndt.${format}`;
-	PiecesImages[7].src = `/images/chess-icons/${pieceSet}/nlt.${format}`;
-	PiecesImages[8].src = `/images/chess-icons/${pieceSet}/bdt.${format}`;
-	PiecesImages[9].src = `/images/chess-icons/${pieceSet}/blt.${format}`;
-	PiecesImages[10].src = `/images/chess-icons/${pieceSet}/pdt.${format}`;
-	PiecesImages[11].src = `/images/chess-icons/${pieceSet}/plt.${format}`;
-	
-}
-
-//only soundset available: chesscom
-//move/capture/castle/game-start/game-end/
-function loadSounds(soundSet){
-	ChessSounds.push(new Audio());
-	ChessSounds[0].src = `/sounds/${soundSet}/move.wav`;
-	ChessSounds.push(new Audio());
-	ChessSounds[1].src = `/sounds/${soundSet}/capture.wav`;
-	ChessSounds.push(new Audio());
-	ChessSounds[2].src = `/sounds/${soundSet}/castle.wav`;
-	ChessSounds.push(new Audio());
-	ChessSounds[3].src = `/sounds/${soundSet}/check.mp3`;
-	ChessSounds.push(new Audio());
-	ChessSounds[4].src = `/sounds/${soundSet}/game-start.wav`;
-	ChessSounds.push(new Audio());
-	ChessSounds[5].src = `/sounds/${soundSet}/game-end.wav`;
-}
 
 function setBoardEditIcons(isWhite){
 	let offset = isWhite ? 1 : 0;
