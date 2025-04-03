@@ -17,36 +17,31 @@ let PiecesImages = [];
 let ChessSounds = [];
 //https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces
 //kK/qQ/rR/nN/bB/pP//
-function loadPieces(){
+function loadPieces(pieceSet, format){
 	PiecesImages.push(new Image());
-	PiecesImages[0].src = "/images/Chess_kdt45.svg";
 	PiecesImages.push(new Image());
-	PiecesImages[1].src = "/images/Chess_klt45.svg";
-
 	PiecesImages.push(new Image());
-	PiecesImages[2].src = "/images/Chess_qdt45.svg";
 	PiecesImages.push(new Image());
-	PiecesImages[3].src = "/images/Chess_qlt45.svg";
-
 	PiecesImages.push(new Image());
-	PiecesImages[4].src = "/images/Chess_rdt45.svg";
 	PiecesImages.push(new Image());
-	PiecesImages[5].src = "/images/Chess_rlt45.svg";
-
 	PiecesImages.push(new Image());
-	PiecesImages[6].src = "/images/Chess_ndt45.svg";
 	PiecesImages.push(new Image());
-	PiecesImages[7].src = "/images/Chess_nlt45.svg";
-
 	PiecesImages.push(new Image());
-	PiecesImages[8].src = "/images/Chess_bdt45.svg";
 	PiecesImages.push(new Image());
-	PiecesImages[9].src = "/images/Chess_blt45.svg";
-
 	PiecesImages.push(new Image());
-	PiecesImages[10].src = "/images/Chess_pdt45.svg";
 	PiecesImages.push(new Image());
-	PiecesImages[11].src = "/images/Chess_plt45.svg";
+	PiecesImages[0].src = `/images/chess-icons/${pieceSet}/kdt.${format}`;
+	PiecesImages[1].src = `/images/chess-icons/${pieceSet}/klt.${format}`;
+	PiecesImages[2].src = `/images/chess-icons/${pieceSet}/qdt.${format}`;
+	PiecesImages[3].src = `/images/chess-icons/${pieceSet}/qlt.${format}`;
+	PiecesImages[4].src = `/images/chess-icons/${pieceSet}/rdt.${format}`;
+	PiecesImages[5].src = `/images/chess-icons/${pieceSet}/rlt.${format}`;
+	PiecesImages[6].src = `/images/chess-icons/${pieceSet}/ndt.${format}`;
+	PiecesImages[7].src = `/images/chess-icons/${pieceSet}/nlt.${format}`;
+	PiecesImages[8].src = `/images/chess-icons/${pieceSet}/bdt.${format}`;
+	PiecesImages[9].src = `/images/chess-icons/${pieceSet}/blt.${format}`;
+	PiecesImages[10].src = `/images/chess-icons/${pieceSet}/pdt.${format}`;
+	PiecesImages[11].src = `/images/chess-icons/${pieceSet}/plt.${format}`;
 	
 }
 
@@ -138,7 +133,7 @@ function windowResized(){
 	resizeBoard(squareMin-(squareMin/4));
 }
 
-loadPieces();
+loadPieces("classic", "svg");
 loadSounds("chesscom");
 let allAssets = PiecesImages.concat(ChessSounds);
 var len = PiecesImages.length,
