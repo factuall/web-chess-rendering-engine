@@ -1,9 +1,11 @@
 import { indexToPosition } from "./chess-utils.js";
+import { openSettings } from "./settings.js";
 
 let historyTable = document.getElementById("side-history-table");
 let sideButtonFlip = document.getElementById("side-button-flip");
 let sideButtonEdit = document.getElementById("side-button-edit");
 let sideButtonNew = document.getElementById("side-button-new");
+let sideButtonSettings = document.getElementById("side-button-settings");
 
 sideButtonFlip.addEventListener("click", ()=>{
     let boardFlipEvent = new CustomEvent("board-flip");
@@ -18,6 +20,10 @@ sideButtonEdit.addEventListener("click", ()=>{
 sideButtonNew.addEventListener("click", ()=>{
     let boardFlipEvent = new CustomEvent("board-new");
     document.dispatchEvent(boardFlipEvent);
+});
+
+sideButtonSettings.addEventListener("click", ()=>{
+    openSettings();
 });
 
 let moveHistory = [];

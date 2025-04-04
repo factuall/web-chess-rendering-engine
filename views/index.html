@@ -19,6 +19,7 @@
 			<div class="side-buttons">
 				<div class="side-button" id="side-button-flip" style="display: inline;">flip board</div>
 				<div class="side-button" id="side-button-edit" style="display: inline;">board edit</div>
+				<div class="side-button" id="side-button-settings" style="display: inline;">settings</div>
 				<div class="side-button" id="side-button-new" style="display: inline;">new game</div>
 			</div>
 			<div class="side-history" style="display: block;">
@@ -45,6 +46,32 @@
 		<div id="bedit-pawn" class="bedit-button"><img src="" class="bedit-icon" alt="pawn"></div>
 		<div id="bedit-color-toggle" class="bedit-button" style="background-color: rgb(228, 228, 228); color: rgb(36, 36, 36)"><img src="/images/color-light.svg" class="bedit-icon" alt="color"></div>
 	</div>
+
+	<div id="settings-popup">
+		<p class="settings-header">Settings</p>
+
+		<div class="settings-row">
+			<label for="chess-icons">Chess-piece icons: </label>
+			<div class="dropdown-dark">
+				<select class="dropdown-select" name="chess-icons" id="settings-chess-icons">
+					<option value="classic">Classic</option>
+					<option value="alpha">Alpha</option>
+				</select>
+			</div>
+		</div>
+
+		<div class="settings-row">
+			<label for="chess-sounds">Sound-set: </label>
+			<div class="dropdown-dark">
+				<select class="dropdown-select" name="chess-sounds" id="settings-chess-sounds">
+					<option value="chesscom">Chess.com</option>
+				</select>
+			</div>
+		</div>
+
+		<button id="settings-close" class="button">Close!</button>
+	  </div>
+
 	<script type="module" src="javascripts/app.js"></script>
 </body>
 </html>
