@@ -1,3 +1,5 @@
+
+
 let ChessSounds = new Array(6);
 for(let i = 0; i < 6; i++){
     ChessSounds[i] = new Audio();
@@ -34,8 +36,10 @@ export function loadPieces(pieceSet, format){
 	PieceImages[9].src = `/images/chess-icons/${pieceSet}/blt.${format}`;
 	PieceImages[10].src = `/images/chess-icons/${pieceSet}/pdt.${format}`;
 	PieceImages[11].src = `/images/chess-icons/${pieceSet}/plt.${format}`;
-	
+	return PieceImages;
 }
+
+
 
 export function getPieceImages(){
     return PieceImages;
@@ -44,3 +48,4 @@ export function getPieceImages(){
 export function getChessSounds(){
     return ChessSounds;
 }
+

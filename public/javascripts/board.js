@@ -1,6 +1,7 @@
 import {DEBUG_SHOW_NUMBERS, DEBUG_SHOWPOS_ONHOVER, APPLY_CHESS_RULES, CurrentPosition, ShowPositionSideCharacters, GameState, playerMoved, kingMoved, rookMoved, getGameState, getAppState, setGameState, StartingPosition} from "./globals.js";
 import { gameStateToFEN, getPossiblePieceMoves, indexToCoords, getLegalMoves, isPieceWhite, performMove, isSquareAttacked, findKingsInPos, interpretFen } from "./chess-utils.js";
 import { historyAppend } from "./side-menu.js";
+import { getPieceImages, loadPieces } from "./resources.js";
 
 let SquareSize = 100;
 let PieceSize = 98;
@@ -26,6 +27,23 @@ const CTX = CANVAS.getContext("2d");
 export function SetPieceImages(images){
     PiecesImages = images;
 }
+
+function changePieceTheme(themeIndex){
+
+	switch(themeIndex){
+		case '0':
+			PiecesImages = loadPieces('classic', 'svg');
+		break;
+		case '1':
+			PiecesImages = loadPieces('alpha', 'png');
+		break;
+	}
+    drawBoard(DisplayPosition);
+}
+
+document.addEventListener('piece-theme-pref-changed', (e)=>{
+	changePieceTheme(e.detail);
+});
 
 export function SetChessSounds(sounds){
     ChessSounds = sounds;
@@ -337,6 +355,8 @@ let pingTo = {x: -1, y: -1};
 let pingArrowsToDraw = [];
 let pingSquaresToDraw = [];
 function updateMouse(){
+    let mouseUpdateEvent = new CustomEvent("mouseUpdate", {detail: mouse})
+    document.dispatchEvent(mouseUpdateEvent);
     if(mouseOneDown && (pingArrowsToDraw.length > 0 || pingSquaresToDraw.length > 0)){
         pingArrowsToDraw = [];
         pingSquaresToDraw = [];
@@ -662,7 +682,11 @@ document.addEventListener('keyup', (event) => {
     }
 });
 
-export function resizeBoard(sizePx){
+export function resizeBoard(size){
+    let sideMenuSize = document.getElementById('side-menu').getBoundingClientRect();
+    
+    let sizePx = (Math.min((window.innerWidth - (sideMenuSize.width * 1.15)), window.innerHeight)) * (size/100);
+
     CANVAS.width = sizePx;
     CANVAS.height = sizePx;
     SquareSize = sizePx/8;
@@ -675,7 +699,6 @@ function historyJump(historyIndex){
     let gs = getGameState();
     if(historyIndex == -1) {
         drawChessBoard(StartingPosition.position);
-        console.log(StartingPosition);
     }else{
         drawChessBoard(interpretFen(gs.moveHistory[historyIndex].fen).position);
         drawPing(
@@ -686,6 +709,21 @@ function historyJump(historyIndex){
     historyViewed = historyIndex;
     let eventHistoryJumped = new CustomEvent("history-jumped", {detail: historyIndex});
     document.dispatchEvent(eventHistoryJumped);
+}
+
+let sizePref = 80;
+document.addEventListener('size-pref-changed', (e)=>{
+    sizePref = e.detail;
+    windowResized();
+})
+
+windowResized();
+addEventListener("resize", (e) => {
+    windowResized();
+});
+
+function windowResized(){
+    resizeBoard(sizePref);
 }
 
 document.addEventListener("board-flip", ()=>{

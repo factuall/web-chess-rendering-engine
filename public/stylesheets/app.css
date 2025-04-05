@@ -212,6 +212,7 @@ button:hover{
 
 .settings-row{
   margin: 4px 0;
+  margin-bottom: 16px;
 }
 
 .settings-header{
@@ -253,4 +254,9 @@ button:hover{
 .dropdown-dark .dropdown-select > option {
   background: #444;
   text-shadow: 0 1px rgba(0, 0, 0, 0.4);
+}
+
+#settings-board-size{
+  margin-top: 0;
+  width: 93%;
 }

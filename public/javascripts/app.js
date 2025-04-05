@@ -79,17 +79,6 @@ applyFenButton.addEventListener('click', (event) => {
 	drawChessBoard(GameState.position);
 });
 
-windowResized();
-addEventListener("resize", (e) => {
-	windowResized();
-});
-
-function windowResized(){
-	let squareMin = Math.min(window.innerHeight, window.innerWidth);
-	if(window.innerWidth<(window.innerHeight*1.35)) squareMin /= 1.15;
-	resizeBoard(squareMin-(squareMin/4));
-}
-
 loadPieces("classic", "svg");
 loadSounds("chesscom");
 let allAssets = PiecesImages.concat(ChessSounds);
@@ -104,8 +93,10 @@ var len = PiecesImages.length,
 } );
 
 function incrementCounter() {
+	console.log("piece loaded");
     counter++;
     if ( counter === len ) {
+		counter = 0;
         start();
     }
 }
