@@ -1,6 +1,7 @@
 let settingsPopup = document.getElementById('settings-popup');
 let closeButton = document.getElementById('settings-close');
 let pieceThemeInput = document.getElementById('settings-chess-icons');
+let boardThemeInput = document.getElementById('settings-board-theme');
 let boardSizeInput = document.getElementById('settings-board-size');
 
 export function openSettings(){
@@ -18,6 +19,11 @@ closeButton.addEventListener('click', ()=>{
 pieceThemeInput.onchange = ()=>{
     let pieceThemePrefChanged = new CustomEvent('piece-theme-pref-changed', {detail: pieceThemeInput.value});
     document.dispatchEvent(pieceThemePrefChanged);
+};
+
+boardThemeInput.onchange = ()=>{
+    let boardThemePrefChanged = new CustomEvent('board-theme-pref-changed', {detail: boardThemeInput.value});
+    document.dispatchEvent(boardThemePrefChanged);
 };
 
 

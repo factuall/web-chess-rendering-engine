@@ -222,7 +222,7 @@ button:hover{
 }
 
 .dropdown-dark {
-  display: inline-block;
+  display: block;
   background: #444;
   border-color: #111111 #0a0a0a black;
   background-image: -webkit-linear-gradient(top, transparent, rgba(0, 0, 0, 0.4));
@@ -242,6 +242,7 @@ button:hover{
 }
 
 .dropdown-dark .dropdown-select {
+  width: 100%;
   color: #aaa;
   text-shadow: 0 1px black;
   background: #444;  /* Fallback for IE 8 */

@@ -1,7 +1,7 @@
 import {DEBUG_SHOW_NUMBERS, DEBUG_SHOWPOS_ONHOVER, APPLY_CHESS_RULES, CurrentPosition, ShowPositionSideCharacters, GameState, playerMoved, kingMoved, rookMoved, getGameState, getAppState, setGameState, StartingPosition} from "./globals.js";
 import { gameStateToFEN, getPossiblePieceMoves, indexToCoords, getLegalMoves, isPieceWhite, performMove, isSquareAttacked, findKingsInPos, interpretFen } from "./chess-utils.js";
 import { historyAppend } from "./side-menu.js";
-import { getPieceImages, loadPieces } from "./resources.js";
+import { getBoardTheme, getPieceImages, loadPieces } from "./resources.js";
 
 let SquareSize = 100;
 let PieceSize = 98;
@@ -29,7 +29,6 @@ export function SetPieceImages(images){
 }
 
 function changePieceTheme(themeIndex){
-
 	switch(themeIndex){
 		case '0':
 			PiecesImages = loadPieces('classic', 'svg');
@@ -38,12 +37,22 @@ function changePieceTheme(themeIndex){
 			PiecesImages = loadPieces('alpha', 'png');
 		break;
 	}
-    drawBoard(DisplayPosition);
 }
 
 document.addEventListener('piece-theme-pref-changed', (e)=>{
 	changePieceTheme(e.detail);
 });
+
+document.addEventListener('board-theme-pref-changed', (e)=>{
+    changeBoardTheme(e.detail);
+});
+
+function changeBoardTheme(themeIndex){
+    let newTheme = getBoardTheme(themeIndex);
+    ColorSquareWhite = newTheme.light;
+    ColorSquareBlack = newTheme.dark;
+    drawChessBoard(DisplayPosition);    
+}
 
 export function SetChessSounds(sounds){
     ChessSounds = sounds;

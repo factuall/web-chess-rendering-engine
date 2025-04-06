@@ -1,4 +1,11 @@
+let BoardThemes = [
+	{light: "#f0d9b5", dark: "#b58863", name: "Classic"},
+	{light: "#a39a8c", dark: "#61554b", name: "Ash"}
+];
 
+export function getBoardTheme(themeIndex){
+	return BoardThemes[themeIndex];
+}
 
 let ChessSounds = new Array(6);
 for(let i = 0; i < 6; i++){
