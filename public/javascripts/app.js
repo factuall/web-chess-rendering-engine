@@ -1,6 +1,6 @@
-import {DEBUG_SHOWPOS_ONHOVER, SquareSize, PieceSize, setCurrentPosition, GameState, getAppState, setGameState, StartingPosition, setStartingPosition} from "./globals.js"
+import {DEBUG_SHOWPOS_ONHOVER, SquareSize, PieceSize, setCurrentPosition, GameState, getAppState, setGameState, StartingPosition, setStartingPosition, getGameState} from "./globals.js"
 import {interpretFen, gameStateToFEN, getLegalMoves} from "./chess-utils.js"
-import { SetChessSounds, SetPieceImages, drawChessBoard, resizeBoard } from "./board.js"
+import { SetChessSounds, SetPieceImages, drawChessBoard, updateFenBar } from "./board.js"
 import { getChessSounds, getPieceImages, loadPieces, loadSounds } from "./resources.js";
 
 const CANVAS = document.getElementById("board-canvas");
@@ -32,7 +32,32 @@ document.addEventListener('keydown', (event) => {
 
 let boardEditContainer = document.getElementById("board-edit-container");
 let editButtons = Array.from(boardEditContainer.children);
-let editColorToggle = document.getElementById("bedit-color-toggle")
+let editColorToggle = document.getElementById("bedit-color-toggle");
+let editCastlingWQ = document.getElementById('bedit-castling-WQ');
+let editCastlingBQ = document.getElementById('bedit-castling-BQ');
+let editCastlingWK = document.getElementById('bedit-castling-WK');
+let editCastlingBK = document.getElementById('bedit-castling-BK');
+editCastlingWQ.addEventListener("click", ()=>{
+	let gs = getGameState();
+	gs.canWhiteCastleQ = editCastlingWQ.checked;
+	updateFenBar();
+})
+editCastlingBQ.addEventListener("click", ()=>{
+	let gs = getGameState();
+	gs.canBlackCastleQ = editCastlingBQ.checked;
+	updateFenBar();
+})
+editCastlingWK.addEventListener("click", ()=>{
+	let gs = getGameState();
+	gs.canWhiteCastleK = editCastlingWK.checked;
+	updateFenBar();
+})
+editCastlingBK.addEventListener("click", ()=>{
+	let gs = getGameState();
+	gs.canBlackCastleK = editCastlingBK.checked;
+	updateFenBar();
+})
+
 
 editColorToggle.addEventListener("click", (event)=>{
 	event.preventDefault();
@@ -63,12 +88,17 @@ document.addEventListener("board-edit", ()=>{
 
 function toggleEditMode(){
 	let appState = getAppState();
+	let gameState = getGameState();
 	appState.editMode = !appState.editMode;
 	if(appState.editMode){
 		boardEditContainer.style.display = "flex";
 	}else{
 		boardEditContainer.style.display = "none";
 	}
+	editCastlingWQ.checked = gameState.canWhiteCastleQ;
+	editCastlingBQ.checked = gameState.canBlackCastleQ;
+	editCastlingWK.checked = gameState.canWhiteCastleK;
+	editCastlingBK.checked = gameState.canBlackCastleK;
 }
 
 let applyFenButton = document.getElementById("apply-fen-button");

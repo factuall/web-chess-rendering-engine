@@ -78,6 +78,22 @@ button:hover{
   margin: 4px;
 }
 
+.bedit-panel{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 164px;
+  height: 80px;
+  text-align: center;
+  padding: 4px;
+  background-color: rgb(83, 83, 83);
+  transition: all 0.2s;
+  border: solid rgb(37, 37, 37) 2px;
+  border-radius: 8px;
+  margin: 4px;
+}
+
 .bedit-button:hover{
   background-color: rgb(70, 70, 70);
 }

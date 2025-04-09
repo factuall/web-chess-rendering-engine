@@ -642,7 +642,7 @@ function applyFen(){
 	drawChessBoard(DisplayPosition);
 }
 
-function updateFenBar(){
+export function updateFenBar(){
     if(FenInput != null)
 	FenInput.value = gameStateToFEN(getGameState());
 }

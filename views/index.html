@@ -45,15 +45,20 @@
 		<div id="bedit-knight" class="bedit-button"><img src="" class="bedit-icon" alt="knight"></div>
 		<div id="bedit-pawn" class="bedit-button"><img src="" class="bedit-icon" alt="pawn"></div>
 		<div id="bedit-color-toggle" class="bedit-button" style="background-color: rgb(228, 228, 228); color: rgb(36, 36, 36)"><img src="/images/color-light.svg" class="bedit-icon" alt="color"></div>
-		<div class="bedit-button" >
-			<p style="padding: 0; margin: 0;">White:</p>
-			<p style="line-height: 10px; padding: 0; margin: 0;">Q<input type="checkbox" id="board-edit-castling-K" style="width: 16px; height: 12px;" name="Castling black king-side"></p>
-			<p style="line-height: 10px; padding: 0; margin: 0;">K<input type="checkbox" id="board-edit-castling-K" style="width: 16px; line-height: 10%;" name="Castling black king-side"></p>
-		</div>
-		<div class="bedit-button">
-			<p style="padding: 0; margin: 0;">White:</p>
-			<p style="line-height: 10px; padding: 0; margin: 0;">Q<input type="checkbox" id="board-edit-castling-K" style="width: 16px; height: 12px;" name="Castling black king-side"></p>
-			<p style="line-height: 10px; padding: 0; margin: 0;">K<input type="checkbox" id="board-edit-castling-K" style="width: 16px; line-height: 10%;" name="Castling black king-side"></p>
+		<div class="bedit-panel" >
+			<table>
+				<p style="padding: 0; margin: 0;">Castling:</p>
+				<tr>
+					<td>W-Q<input type="checkbox" id="bedit-castling-WQ" style="width: 16px; height: 12px;" name="Castling white queen-side"></td>
+					<td>B-Q<input type="checkbox" id="bedit-castling-BQ" style="width: 16px; line-height: 10%;" name="Castling black queen-side"></td>
+				</tr>
+				<tr>
+					<td>W-K<input type="checkbox" id="bedit-castling-WK" style="width: 16px; height: 12px;" name="Castling white king-side"></td>
+					<td>B-K<input type="checkbox" id="bedit-castling-BK" style="width: 16px; line-height: 10%;" name="Castling black king-side"></td>
+				</tr>
+			</table>
+			<p style="line-height: 10px; padding: 0; margin: 0;"></p>
+			<p style="line-height: 10px; padding: 0; margin: 0;"></p>
 		</div>
 	</div>
 
