@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Pola's chess</title>
+
+
+	<!-- STYLES -->
+	<link rel="stylesheet" href="stylesheets/app.css">
+
+	<!-- JS -->
+
+
+</head>
+<body>
+	<div class="container">
+		<canvas id="board-canvas" width="800" height="800" class="board"></canvas>
+		<div class="side-menu" id="side-menu">
+			<div class="side-buttons">
+				<div class="side-button" id="side-button-flip" style="display: inline;">flip board</div>
+				<div class="side-button" id="side-button-edit" style="display: inline;">board edit</div>
+				<div class="side-button" id="side-button-settings" style="display: inline;">settings</div>
+				<div class="side-button" id="side-button-new" style="display: inline;">new game</div>
+			</div>
+			<div class="side-history" style="display: block;">
+				<div class="side-history-table roboto-regular" id="side-history-table">
+				</div>
+			</div>
+		</div>
+
+	</div>
+	<div class="container">
+		<button id="apply-fen-button">Apply a position (FEN)</button>
+		<input id="fen-input" type="text" value="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1">
+	</div>
+
+	</div>
+	<div id="board-edit-container" class="container" style="display: none;">
+		<div id="bedit-delete" class="bedit-button"><img src="/images/delete.svg" class="bedit-icon filter-invert" alt="delete"></div>
+		<div id="bedit-move" class="bedit-button"><img src="/images/cursor.svg" class="bedit-icon filter-invert" alt="move" style="width: 60px; height: 60px; margin-top: 10px"></div>
+		<div id="bedit-king" class="bedit-button"><img src="" class="bedit-icon" alt="king"></div>
+		<div id="bedit-queen" class="bedit-button"><img src="" class="bedit-icon" alt="queen"></div>
+		<div id="bedit-rook" class="bedit-button"><img src="" class="bedit-icon" alt="rook"></div>
+		<div id="bedit-bishop" class="bedit-button"><img src="" class="bedit-icon" alt="bishop"></div>
+		<div id="bedit-knight" class="bedit-button"><img src="" class="bedit-icon" alt="knight"></div>
+		<div id="bedit-pawn" class="bedit-button"><img src="" class="bedit-icon" alt="pawn"></div>
+		<div id="bedit-color-toggle" class="bedit-button" style="background-color: rgb(228, 228, 228); color: rgb(36, 36, 36)"><img src="/images/color-light.svg" class="bedit-icon" alt="color"></div>
+		<div class="bedit-panel" >
+			<table>
+				<p style="padding: 0; margin: 0;">Castling:</p>
+				<tr>
+					<td>W-Q<input type="checkbox" id="bedit-castling-WQ" style="width: 16px; height: 12px;" name="Castling white queen-side"></td>
+					<td>B-Q<input type="checkbox" id="bedit-castling-BQ" style="width: 16px; line-height: 10%;" name="Castling black queen-side"></td>
+				</tr>
+				<tr>
+					<td>W-K<input type="checkbox" id="bedit-castling-WK" style="width: 16px; height: 12px;" name="Castling white king-side"></td>
+					<td>B-K<input type="checkbox" id="bedit-castling-BK" style="width: 16px; line-height: 10%;" name="Castling black king-side"></td>
+				</tr>
+			</table>
+			<p style="line-height: 10px; padding: 0; margin: 0;"></p>
+			<p style="line-height: 10px; padding: 0; margin: 0;"></p>
+		</div>
+	</div>
+
+	<div id="settings-popup">
+		<p class="settings-header">Settings</p>
+
+		<div class="settings-row">
+			<label for="chess-icons">Chess-piece icons: </label>
+			<div class="dropdown-dark">
+				<select class="dropdown-select" name="chess-icons" id="settings-chess-icons">
+					<option value="0">Classic</option>
+					<option value="1">Alpha</option>
+				</select>
+			</div>
+		</div>
+
+		<div class="settings-row">
+			<label for="chess-icons">Board themes:</label>
+			<div class="dropdown-dark">
+				<select class="dropdown-select" name="board-theme" id="settings-board-theme">
+					<option value="0">Classic</option>
+					<option value="1">Ash</option>
+				</select>
+			</div>
+		</div>
+
+		<div class="settings-row">
+			<label for="chess-sounds">Sound-set: </label>
+			<div class="dropdown-dark">
+				<select class="dropdown-select" name="chess-sounds" id="settings-chess-sounds">
+					<option value="chesscom">Chess.com</option>
+				</select>
+			</div>
+		</div>
+
+		<div class="settings-row">
+			<label for="board-size">Board size:</label>
+			<input type="range" min="1" max="100" value="50" class="slider" title="board-size" id="settings-board-size">
+		  </div>
+
+		<button id="settings-close" class="button">Close!</button>
+	  </div>
+
+	<script type="module" src="javascripts/app.js"></script>
+</body>
+</html>
